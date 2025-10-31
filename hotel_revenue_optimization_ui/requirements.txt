@@ -8,4 +8,4 @@ python-dotenv==1.0.0
 requests==2.31.0
 werkzeug==3.0.3
 pyjwt==2.8.0
-cryptography==42.0.8
+cryptography==44.0.1
