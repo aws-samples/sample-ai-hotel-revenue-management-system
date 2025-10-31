@@ -1,4 +1,4 @@
-## My Project
+## Hotel Revenue Management System
 
 TODO: Fill this README out!
 
