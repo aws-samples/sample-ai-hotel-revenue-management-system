@@ -1,4 +1,4 @@
-# AI-Powered Hotel Revenue Management System
+# AI-Powered Hotel Revenue Optimization System
 
 An intelligent multi-agent system that leverages Amazon Bedrock AgentCore and CrewAI to optimize hotel room pricing and maximize revenue through AI-driven analysis and recommendations.
 
