@@ -1,0 +1,686 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Structured Form{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Structured Form Query</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Sample Hotel Profiles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <small><i class="bi bi-info-circle"></i> These are sample hotel profiles. Select one to pre-populate the form with sample data.</small>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Metropolitan Business Hotel</h5>
+                                    <p class="card-text">Downtown Chicago business hotel (60601) with convention center proximity and corporate clientele</p>
+                                    <button type="button" class="btn btn-outline-primary btn-sm hotel-profile" 
+                                        data-hotel-name="Metropolitan Business Hotel"
+                                        data-hotel-type="business" 
+                                        data-location="Chicago, IL 60601" 
+                                        data-season="high" 
+                                        data-star-rating="4" 
+                                        data-occupancy-rate="65" 
+                                        data-competitor-analysis="true" 
+                                        data-optimization-goal="maximize_revenue">
+                                        <i class="bi bi-building"></i> Select Profile
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Grand Oceanview Resort</h5>
+                                    <p class="card-text">5-star luxury oceanfront resort in Miami Beach (33139) with premium suites and high-end amenities</p>
+                                    <button type="button" class="btn btn-outline-primary btn-sm hotel-profile" 
+                                        data-hotel-name="Grand Oceanview Resort"
+                                        data-hotel-type="luxury" 
+                                        data-location="Miami Beach, FL 33139" 
+                                        data-season="high" 
+                                        data-star-rating="5" 
+                                        data-occupancy-rate="78" 
+                                        data-competitor-analysis="true" 
+                                        data-optimization-goal="balance">
+                                        <i class="bi bi-building"></i> Select Profile
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Sunset Mountain Resort</h5>
+                                    <p class="card-text">4.5-star ski resort in Aspen (81611) with seasonal challenges and year-round revenue optimization needs</p>
+                                    <button type="button" class="btn btn-outline-primary btn-sm hotel-profile" 
+                                        data-hotel-name="Sunset Mountain Resort"
+                                        data-hotel-type="resort" 
+                                        data-location="Aspen, CO 81611" 
+                                        data-season="low" 
+                                        data-star-rating="4" 
+                                        data-occupancy-rate="45" 
+                                        data-competitor-analysis="true" 
+                                        data-optimization-goal="maximize_occupancy">
+                                        <i class="bi bi-building"></i> Select Profile
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Hotel Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('main.structured_form') }}" id="structuredForm">
+                        {{ form.csrf_token }}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                {{ form.hotel_name.label(class="form-label") }}
+                                {{ form.hotel_name(class="form-control") }}
+                                {% if form.hotel_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.hotel_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.hotel_type.label(class="form-label") }}
+                                {{ form.hotel_type(class="form-select") }}
+                                {% if form.hotel_type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.hotel_type.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.location.label(class="form-label") }}
+                                {{ form.location(class="form-control") }}
+                                {% if form.location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.location.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                {{ form.season.label(class="form-label") }}
+                                {{ form.season(class="form-select") }}
+                                {% if form.season.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.season.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.star_rating.label(class="form-label") }}
+                                {{ form.star_rating(class="form-select") }}
+                                {% if form.star_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.star_rating.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.occupancy_rate.label(class="form-label") }}
+                                {{ form.occupancy_rate(class="form-control") }}
+                                {% if form.occupancy_rate.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.occupancy_rate.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.optimization_goal.label(class="form-label") }}
+                                {{ form.optimization_goal(class="form-select") }}
+                                {% if form.optimization_goal.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.optimization_goal.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-4">
+                                    {{ form.competitor_analysis(class="form-check-input") }}
+                                    {{ form.competitor_analysis.label(class="form-check-label") }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="bi bi-graph-up"></i> Generate Recommendations
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset Form
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Results Section -->
+                    <div id="resultsSection" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Results</h5>
+                            </div>
+                            <div class="card-body" id="resultsContent">
+                                <!-- Results will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Spinner -->
+                    <div class="loading-container mt-4 d-none" id="loadingSpinner">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border text-primary me-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Generating recommendations...</h5>
+                                <p class="mb-2">Research may take up to 60 seconds to complete.</p>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="d-flex">
+                                    <button class="btn btn-sm btn-outline-secondary me-2" id="acknowledgeBtn">
+                                        <i class="bi bi-check-circle"></i> Acknowledge
+                                    </button>
+                                    <a href="{{ url_for('main.history') }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-clock-history"></i> Check History Later
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if result %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        Results 
+                        {% if result.status == "success" %}
+                            <span class="badge bg-success">Success</span>
+                        {% elif result.status == "partial_success" %}
+                            <span class="badge bg-warning">Partial Success</span>
+                        {% elif result.status == "failure" or result.status == "error" %}
+                            <span class="badge bg-danger">Failed</span>
+                        {% endif %}
+                    </h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="printResults()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if result.status == "partial_success" %}
+                    <div class="alert alert-warning">
+                        <h5><i class="bi bi-exclamation-triangle"></i> Partial Results</h5>
+                        <p>Some tasks could not be completed. The report below contains partial results.</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Completed Tasks:</h6>
+                                <ul>
+                                    {% for task in result.completed_tasks %}
+                                    <li>{{ task|replace('_', ' ')|title }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Failed Tasks:</h6>
+                                <ul>
+                                    {% for task in result.failed_tasks %}
+                                    <li>{{ task|replace('_', ' ')|title }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif result.status == "failure" or result.status == "error" %}
+                    <div class="alert alert-danger">
+                        <h5><i class="bi bi-x-circle"></i> Request Failed</h5>
+                        
+                        {% if result.message %}
+                            <p><strong>{{ result.message }}</strong></p>
+                        {% elif result.summary %}
+                            <p><strong>{{ result.summary }}</strong></p>
+                        {% else %}
+                            <p>We encountered an issue while processing your request.</p>
+                        {% endif %}
+                        
+                        <!-- Handle irrelevant query error type -->
+                        {% if result.error_type == "irrelevant_query" %}
+                            {% if result.guidance %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-lightbulb"></i> {{ result.guidance }}</h6>
+                                    {% if result.capabilities %}
+                                        <ul class="mb-2">
+                                            {% for capability in result.capabilities %}
+                                            <li>{{ capability }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.example %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-chat-quote"></i> Example:</h6>
+                                    <div class="bg-light p-3 rounded mb-2">
+                                        <code>{{ result.example }}</code>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        
+                        <!-- Handle insufficient information error type -->
+                        {% elif result.error_type == "insufficient_information" %}
+                            {% if result.missing_critical_info %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-exclamation-triangle"></i> Missing Critical Information:</h6>
+                                    <ul class="mb-2">
+                                        {% for info in result.missing_critical_info %}
+                                        <li><strong>{{ info|title }}</strong></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.guidance and result.required_info %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-lightbulb"></i> {{ result.guidance }}</h6>
+                                    <ul class="mb-2">
+                                        {% for info in result.required_info %}
+                                        <li>{{ info }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.examples %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-chat-quote"></i> Example Queries:</h6>
+                                    {% for example in result.examples %}
+                                    <div class="bg-light p-2 rounded mb-2">
+                                        <code>{{ example }}</code>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        
+                        <!-- Fallback for legacy error format -->
+                        {% else %}
+                            {% if result.missing_fields %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-info-circle"></i> Missing Information:</h6>
+                                    <ul class="mb-2">
+                                        {% for field in result.missing_fields %}
+                                        <li>{{ field|replace('_', ' ')|title }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.guidance %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-lightbulb"></i> Guidance:</h6>
+                                    <p class="mb-2">{{ result.guidance }}</p>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.example %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-chat-quote"></i> Example:</h6>
+                                    <div class="bg-light p-3 rounded mb-2">
+                                        <code>{{ result.example }}</code>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> 
+                                Please fill out all required fields in the form above with specific hotel details.
+                            </small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if markdown_content %}
+                    <div class="markdown-content">
+                        {{ markdown_content|safe }}
+                    </div>
+                    {% elif result.status == "success" or result.status == "partial_success" %}
+                    <div class="alert alert-info">
+                        No detailed content available. Please check the raw result below.
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Debug section for raw JSON responses (only show for errors or when no markdown content) -->
+                    {% if (result.status == "error" or result.status == "failure") and not result.message and not result.missing_fields %}
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#rawResponse">
+                            <i class="bi bi-code"></i> Show Raw Response
+                        </button>
+                        <div class="collapse mt-2" id="rawResponse">
+                            <div class="card card-body bg-light">
+                                <pre><code>{{ result|tojson(indent=2) }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if result.status == "success" or result.status == "partial_success" %}
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="printResults()">
+                            <i class="bi bi-download"></i> Save Report
+                        </button>
+                        <a href="{{ url_for('main.history') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-clock-history"></i> View History
+                        </a>
+                        
+                        <!-- Show metadata if available -->
+                        {% if result.metadata %}
+                        <button class="btn btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#metadata">
+                            <i class="bi bi-info-circle"></i> Analysis Details
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Metadata section -->
+                    {% if result.metadata %}
+                    <div class="collapse mt-3" id="metadata">
+                        <div class="card card-body bg-light">
+                            <h6><i class="bi bi-speedometer2"></i> Analysis Performance</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {% if result.metadata.duration_seconds %}
+                                    <p><strong>Duration:</strong> {{ "%.1f"|format(result.metadata.duration_seconds) }} seconds</p>
+                                    {% endif %}
+                                    {% if result.metadata.run_id %}
+                                    <p><strong>Run ID:</strong> <code>{{ result.metadata.run_id }}</code></p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if result.metadata.start_time %}
+                                    <p><strong>Started:</strong> {{ result.metadata.start_time }}</p>
+                                    {% endif %}
+                                    {% if result.metadata.end_time %}
+                                    <p><strong>Completed:</strong> {{ result.metadata.end_time }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if result.completed_tasks %}
+                            <h6 class="mt-3"><i class="bi bi-check-circle text-success"></i> Completed Tasks</h6>
+                            <ul class="list-unstyled">
+                                {% for task in result.completed_tasks %}
+                                <li><i class="bi bi-check text-success"></i> {{ task|replace('_', ' ')|title }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            
+                            {% if result.failed_tasks %}
+                            <h6 class="mt-3"><i class="bi bi-x-circle text-danger"></i> Failed Tasks</h6>
+                            <ul class="list-unstyled">
+                                {% for task in result.failed_tasks %}
+                                <li><i class="bi bi-x text-danger"></i> {{ task|replace('_', ' ')|title }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle hotel profile selection
+        document.querySelectorAll('.hotel-profile').forEach(function(button) {
+            button.addEventListener('click', function() {
+                // Get data attributes
+                const hotelName = this.getAttribute('data-hotel-name');
+                const hotelType = this.getAttribute('data-hotel-type');
+                const location = this.getAttribute('data-location');
+                const season = this.getAttribute('data-season');
+                const starRating = this.getAttribute('data-star-rating');
+                const occupancyRate = this.getAttribute('data-occupancy-rate');
+                const competitorAnalysis = this.getAttribute('data-competitor-analysis') === 'true';
+                const optimizationGoal = this.getAttribute('data-optimization-goal');
+                
+                // Set form values
+                document.getElementById('hotel_name').value = hotelName;
+                document.getElementById('hotel_type').value = hotelType;
+                document.getElementById('location').value = location;
+                document.getElementById('season').value = season;
+                document.getElementById('star_rating').value = starRating;
+                document.getElementById('occupancy_rate').value = occupancyRate;
+                document.getElementById('competitor_analysis').checked = competitorAnalysis;
+                document.getElementById('optimization_goal').value = optimizationGoal;
+                
+                // Highlight the selected profile
+                document.querySelectorAll('.hotel-profile').forEach(btn => {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-outline-primary');
+                });
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+                
+                // Scroll to the form
+                document.getElementById('structuredForm').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        
+        // Handle form submission and loading spinner
+        const structuredForm = document.getElementById('structuredForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const acknowledgeBtn = document.getElementById('acknowledgeBtn');
+        
+        if (structuredForm) {
+            structuredForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const resultsSection = document.getElementById('resultsSection');
+                const resultsContent = document.getElementById('resultsContent');
+                
+                // Disable submit button
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+                
+                // Show results section with loading spinner
+                resultsSection.style.display = 'block';
+                resultsContent.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="mt-3">
+                            <h5>Processing your analysis...</h5>
+                            <p class="text-muted">This may take a few moments. You can wait here or check back later in your history.</p>
+                            <button type="button" class="btn btn-outline-secondary" onclick="acknowledgeProcessing()">
+                                <i class="bi bi-check"></i> I'll check later
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Submit form
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'processing') {
+                        currentTimestamp = data.timestamp;
+                        startPolling(data.timestamp);
+                    } else {
+                        showError('Failed to submit analysis');
+                    }
+                })
+                .catch(error => {
+                    showError('Error submitting analysis: ' + error.message);
+                });
+            });
+        }
+    });
+
+let pollingInterval = null;
+let currentTimestamp = null;
+
+function startPolling(timestamp) {
+    pollingInterval = setInterval(() => {
+        fetch(`/check-query-status/${timestamp}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                stopPolling();
+                showResults(timestamp);
+            } else if (data.status === 'failed') {
+                stopPolling();
+                showError('Analysis processing failed: ' + data.summary);
+            }
+        })
+        .catch(error => {
+            console.error('Polling error:', error);
+        });
+    }, 3000);
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="bi bi-send"></i> Submit Analysis';
+}
+
+function acknowledgeProcessing() {
+    stopPolling();
+    
+    const resultsContent = document.getElementById('resultsContent');
+    resultsContent.innerHTML = `
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle"></i>
+            <strong>Analysis submitted successfully!</strong> 
+            Your analysis is being processed in the background. 
+            <a href="/history" class="alert-link">Check your history</a> to see the results when ready.
+        </div>
+    `;
+}
+
+function showResults(timestamp) {
+    window.location.href = `/history/${timestamp}`;
+}
+
+function showError(message) {
+    stopPolling();
+    
+    const resultsContent = document.getElementById('resultsContent');
+    resultsContent.innerHTML = `
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Error:</strong> ${message}
+        </div>
+    `;
+}
+
+    function printResults() {
+        const resultsCard = document.querySelector('.card .badge').closest('.card');
+        if (resultsCard) {
+            const cardClone = resultsCard.cloneNode(true);
+            const cardHeader = cardClone.querySelector('.card-header');
+            if (cardHeader) {
+                cardHeader.remove();
+            }
+            
+            const currentDate = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long', 
+                day: 'numeric'
+            });
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Hotel Revenue Analysis Report</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        @media print { 
+                            body { margin: 0; } 
+                            .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 12px; color: #666; }
+                        }
+                        .no-print { display: none !important; }
+                        .footer { margin-top: 2rem; padding: 1rem; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #eee; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container-fluid p-3">
+                        ${cardClone.outerHTML.replace(/onclick="[^"]*"/g, '').replace(/class="btn[^"]*"/g, 'class="no-print"')}
+                    </div>
+                    <div class="footer">
+                        © 2025 Zenith Stays Group | ${currentDate}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    }
+</script>
+{% endblock %}

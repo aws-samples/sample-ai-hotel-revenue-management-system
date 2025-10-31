@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Login{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card mt-5">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">Login</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-center mb-4">
+                        <i class="bi bi-shield-lock fs-1"></i>
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <p class="mb-0">
+                            <i class="bi bi-info-circle"></i> 
+                            Authentication is currently disabled for local testing. 
+                            Click the button below to continue as a test user.
+                        </p>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Continue as Test User
+                        </a>
+                    </div>
+                    
+                    <hr>
+                    
+                    <p class="text-muted text-center mb-0">
+                        <small>In production, this page would connect to Amazon Cognito for secure authentication.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

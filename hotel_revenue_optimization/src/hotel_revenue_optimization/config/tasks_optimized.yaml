@@ -1,0 +1,329 @@
+market_analysis_task:
+  description: >
+    **CURRENT DATE: {current_date}**
+    
+    Quickly analyze market conditions and competitor pricing for the hotel.
+    Focus on key insights only. Use current 2025 market data and trends.
+    
+    Hotel: {hotel_name} in {hotel_location}
+    Current ADR: {current_adr}, Occupancy: {historical_occupancy}
+    
+    **CONTEXT FOR ANALYSIS:**
+    - Consider Q4 2025 seasonal patterns (October-December)
+    - Factor in post-pandemic travel recovery trends
+    - Account for current economic conditions and inflation impact on travel
+    - Include 2025 hospitality technology trends (mobile check-in, contactless services)
+    
+    {%- if include_competitor_analysis == 'true' %}
+    
+    **IMPORTANT**: Include detailed competitor analysis with:
+    - Specific competitor names and their current 2025 pricing
+    - Competitive positioning analysis based on recent market shifts
+    - Market share insights reflecting current travel patterns
+    - Competitive advantages/disadvantages in the current market
+    {%- endif %}
+    
+    **CRITICAL FORMATTING REQUIREMENTS:**
+    - Use # for main headers, ## for sections, ### for subsections
+    - Use **bold** for emphasis and key terms
+    - Use - for bullet lists with **bold** labels
+    - Use proper markdown tables with | separators
+    - Ensure proper spacing between sections
+  expected_output: >
+    Market analysis in proper markdown format:
+    
+    # Market Analysis
+    
+    ## Key Findings
+    - **Market Positioning**: Summary with **bold** key terms
+    - **Top Competitor Insights**: 
+      - **Competitor 1**: Key insight
+      - **Competitor 2**: Key insight
+      - **Competitor 3**: Key insight
+    
+    {%- if include_competitor_analysis == 'true' %}
+    
+    ## Detailed Competitor Analysis
+    
+    | Competitor | ADR Range | Positioning | Market Share | Key Strengths |
+    |------------|-----------|-------------|--------------|---------------|
+    | Competitor 1 | $XXX-$XXX | Luxury/Mid/Budget | XX% | Strength 1, 2 |
+    | Competitor 2 | $XXX-$XXX | Luxury/Mid/Budget | XX% | Strength 1, 2 |
+    
+    ### Competitive Positioning
+    - **Our Position vs Competitors**: Analysis
+    - **Pricing Gaps and Opportunities**: Details
+    - **Differentiation Strategies**: Recommendations
+    {%- endif %}
+    
+    ## Main Demand Drivers
+    - **Driver 1**: Description
+    - **Driver 2**: Description
+    
+    ## Recommendations
+    - **Action 1**: Key competitive advantage strategy
+    - **Action 2**: Market positioning improvement
+  agent: market_analyst
+
+demand_forecast_task:
+  description: >
+    **CURRENT DATE: {current_date}**
+    
+    Create a focused demand forecast for the next 90 days (October-December 2025).
+    Prioritize actionable insights over detailed analysis.
+    
+    Hotel: {hotel_name} in {hotel_location}
+    Historical Occupancy: {historical_occupancy}
+    
+    **FORECASTING CONTEXT:**
+    - Q4 2025 seasonal patterns: Halloween, Thanksgiving, Christmas, New Year
+    - Business travel recovery patterns in late 2025
+    - Holiday booking windows and advance purchase trends
+    - Weather impact on destination travel (winter season)
+    - Economic factors affecting travel spending in Q4 2025
+    
+    **ANALYSIS REQUIREMENTS:**
+    - Provide specific date ranges for peak/low periods
+    - Include confidence levels (High/Medium/Low) with reasoning
+    - Consider day-of-week patterns (weekday vs weekend demand)
+    - Factor in local events, conferences, and seasonal attractions
+    - Account for booking lead times by segment (business vs leisure)
+    
+    **CRITICAL FORMATTING REQUIREMENTS:**
+    - Use # for main headers, ## for sections, ### for subsections
+    - Use **bold** for emphasis and key terms
+    - Use - for bullet lists with **bold** labels
+    - Use proper markdown tables with | separators
+    - Ensure proper spacing between sections
+  expected_output: >
+    Demand forecast in proper markdown format:
+    
+    # Demand Forecast
+    
+    ## Summary
+    - **Overall Occupancy Projection**: XX% for next 90 days
+    - **Peak Demand Periods**: Specific dates/periods
+    - **Low Demand Periods**: Specific dates/periods
+    
+    ## Key Segments Analysis
+    
+    | Segment | Projected Occupancy | Confidence | Key Drivers |
+    |---------|-------------------|------------|-------------|
+    | **Business** | XX% | High/Medium/Low | Driver details |
+    | **Leisure** | XX% | High/Medium/Low | Driver details |
+    | **Group** | XX% | High/Medium/Low | Driver details |
+    
+    ## Seasonal Patterns
+    - **High Season**: Dates and expected impact
+    - **Shoulder Season**: Dates and expected impact
+    - **Low Season**: Dates and expected impact
+    
+    ## Action Items
+    - **Opportunity 1**: Specific demand optimization strategy
+    - **Opportunity 2**: Capacity management recommendation
+    - **Opportunity 3**: Segment-specific targeting approach
+  agent: demand_forecaster
+
+pricing_strategy_task:
+  description: >
+    **CURRENT DATE: {current_date}**
+    
+    Develop focused pricing recommendations based on market and demand insights.
+    Emphasize quick wins and high-impact strategies for Q4 2025 implementation.
+    
+    Hotel: {hotel_name}, Current ADR: {current_adr}, Target RevPAR: {target_revpar}
+    
+    **PRICING STRATEGY CONTEXT:**
+    - Q4 2025 pricing opportunities: Holiday premiums, year-end corporate travel
+    - Current inflation impact on hospitality pricing (2025 economic conditions)
+    - Dynamic pricing technology adoption in hospitality industry
+    - Channel mix optimization (direct booking vs OTA strategies)
+    - Package and ancillary revenue opportunities for Q4 2025
+    
+    **STRATEGY REQUIREMENTS:**
+    - Provide specific dollar amounts for rate adjustments
+    - Include implementation timelines (immediate, 30-day, 90-day)
+    - Consider rate fencing strategies by booking channel
+    - Factor in cancellation policies and booking windows
+    - Address seasonal pricing elasticity and demand sensitivity
+    
+    {%- if include_competitor_analysis == 'true' %}
+    
+    **IMPORTANT**: Include competitor-based pricing analysis:
+    - Compare our rates vs key competitors using current 2025 market data
+    - Identify pricing gaps and opportunities in the current competitive landscape
+    - Recommend competitive positioning strategies for Q4 2025 market conditions
+    {%- endif %}
+    
+    **CRITICAL FORMATTING REQUIREMENTS:**
+    - Use # for main headers, ## for sections, ### for subsections
+    - Use **bold** for emphasis and key terms
+    - Use - for bullet lists with **bold** labels
+    - Use proper markdown tables with | separators
+    - Ensure proper spacing between sections
+  expected_output: >
+    Pricing strategy in proper markdown format:
+    
+    # Pricing Strategy
+    
+    ## Rate Recommendations
+    
+    | Room Type | Current Rate | Recommended Rate | Expected Impact |
+    |-----------|-------------|------------------|-----------------|
+    | **Standard** | $XXX | $XXX | +X% RevPAR |
+    | **Deluxe** | $XXX | $XXX | +X% RevPAR |
+    | **Suite** | $XXX | $XXX | +X% RevPAR |
+    
+    {%- if include_competitor_analysis == 'true' %}
+    
+    ## Competitive Pricing Analysis
+    
+    | Room Type | Our Rate | Competitor Avg | Position | Recommendation |
+    |-----------|----------|----------------|----------|----------------|
+    | **Standard** | $XXX | $XXX | Above/Below/At Market | Specific action |
+    | **Deluxe** | $XXX | $XXX | Above/Below/At Market | Specific action |
+    
+    ### Competitive Positioning Strategy
+    - **Rate Positioning vs Competitors**: Analysis and rationale
+    - **Premium/Discount Justification**: Value proposition details
+    - **Market Penetration Opportunities**: Specific tactics
+    {%- endif %}
+    
+    ## Dynamic Pricing Rules
+    - **High Demand Periods**: +X% premium (specific triggers)
+    - **Low Demand Periods**: -X% discount (specific triggers)
+    - **Advance Booking**: Tiered discount structure
+    
+    ## Quick Wins
+    - **Immediate Action 1**: Specific pricing adjustment with timeline
+    - **Immediate Action 2**: Channel optimization strategy
+    - **Immediate Action 3**: Promotional pricing opportunity
+  agent: pricing_strategist
+
+revenue_management_task:
+  description: >
+    **CURRENT DATE: {current_date}**
+    **IMPLEMENTATION START DATE: {implementation_start_date}** (Next Monday)
+    
+    Compile insights into a comprehensive revenue optimization plan for Q4 2025 execution.
+    Focus on actionable recommendations and clear implementation steps with specific timelines.
+    
+    Hotel: {hotel_name}, Current RevPAR: {current_revpar}, Target: {target_revpar}
+    
+    **IMPLEMENTATION TIMELINE REQUIREMENTS:**
+    - Start all implementation activities from {implementation_start_date} (next Monday)
+    - Provide weekly milestones starting from this date
+    - Include specific dates for each action item in the roadmap
+    - Consider business day scheduling (avoid weekends for major implementations)
+    
+    **EXECUTIVE CONTEXT:**
+    - Q4 2025 revenue optimization priorities and market opportunities
+    - Year-end performance targets and budget considerations
+    - Technology implementation capabilities and constraints
+    - Staff training requirements for new pricing strategies
+    - Integration with existing property management systems
+    
+    **IMPLEMENTATION FOCUS:**
+    - Provide specific dollar impact projections with confidence intervals
+    - Include risk assessment and mitigation strategies
+    - Consider operational feasibility and resource requirements
+    - Address change management and staff communication needs
+    - Factor in seasonal staffing and operational capacity
+    
+    **EXECUTIVE REPORTING REQUIREMENTS:**
+    - Executive summary suitable for C-level presentation
+    - Clear ROI calculations and payback periods
+    - Competitive benchmarking and market positioning analysis
+    - Performance tracking methodology and success metrics
+    - Escalation procedures and adjustment protocols
+    
+    **CRITICAL FORMATTING REQUIREMENTS:**
+    - Use # for main headers, ## for sections, ### for subsections
+    - Use **bold** for emphasis and key terms
+    - Use - for bullet lists with **bold** labels
+    - Use proper markdown tables with | separators
+    - Use - [ ] for task checkboxes
+    - Ensure proper spacing between sections
+  expected_output: >
+    Executive revenue optimization plan in proper markdown format:
+    
+    # Hotel Revenue Management Director Execution Plan
+    
+    ## Executive Summary
+    
+    ### Current Performance Metrics
+    - **Hotel**: {hotel_name}
+    - **Location**: {hotel_location}
+    - **Current RevPAR**: {current_revpar}
+    - **Target RevPAR**: {target_revpar}
+    - **Revenue Gap**: $XXX per available room
+    - **Implementation Start**: {implementation_start_date}
+    - **Key Opportunity**: Brief description of primary revenue driver
+    
+    ## Market Insights
+    
+    ### Competitive Landscape
+    - **Market Position**: Current standing vs competitors
+    - **Pricing Advantage**: Areas where we lead
+    - **Improvement Opportunities**: Gaps to address
+    
+    ### Seasonal Demand Patterns
+    - **Peak Season**: Months and expected performance
+    - **Shoulder Season**: Transition periods and strategies
+    - **Low Season**: Challenges and mitigation tactics
+    
+    ## Actionable Recommendations
+    
+    ### 1. Rate Optimization Strategy
+    - **Current Gap**: Specific pricing analysis
+    - **Recommended Action**: Detailed pricing adjustment
+    - **Expected Impact**: Revenue increase projection
+    
+    ### 2. Demand Management
+    - **Opportunity**: Specific demand driver
+    - **Implementation**: Tactical approach
+    - **Timeline**: Execution schedule
+    
+    ### 3. Channel Strategy
+    - **Focus Area**: Primary distribution channel
+    - **Optimization**: Specific improvements
+    - **Revenue Impact**: Expected contribution
+    
+    ## Implementation Roadmap
+    
+    ### Week 1 (Starting {implementation_start_date})
+    - [ ] **Update Rate Structures in PMS**: Implement new pricing tiers
+    - [ ] **Launch Weekend Premium Strategy**: Add $XX weekend surcharge
+    - [ ] **Optimize OTA Positioning**: Adjust rate parity and visibility
+    
+    ### Week 2 (Specific date)
+    - [ ] **Implement Dynamic Pricing**: Deploy demand-based rate adjustments
+    - [ ] **Enhance Direct Booking Strategy**: Launch loyalty program incentives
+    - [ ] **Develop Package Offerings**: Create value-added experiences
+    
+    ### Week 3-4 (Specific dates)
+    - [ ] **Staff Training Program**: Revenue optimization training
+    - [ ] **Performance Monitoring Setup**: KPI tracking systems
+    - [ ] **Competitor Analysis Tools**: Market intelligence systems
+    
+    ## Revenue Projections
+    
+    | Week | Projected RevPAR | Revenue Impact | Cumulative Gain |
+    |------|------------------|----------------|-----------------|
+    | **Week 1** | $XXX | +$XXX | $XXX |
+    | **Week 2** | $XXX | +$XXX | $XXX |
+    | **Week 3** | $XXX | +$XXX | $XXX |
+    
+    ## Success Metrics & KPIs
+    
+    ### Primary Metrics
+    - **RevPAR Growth**: Target XX% increase
+    - **ADR Improvement**: Target $XX increase
+    - **Occupancy Optimization**: Maintain XX%+ occupancy
+    
+    ### Review Schedule
+    - **Weekly**: Rate performance and competitor monitoring (every Monday)
+    - **Monthly**: Revenue target assessment and strategy adjustment
+    - **Quarterly**: Comprehensive market position review
+  agent: revenue_manager
+  output_file: 'output/revenue_optimization_plan.md'

@@ -1,0 +1,99 @@
+# Historical Booking Data - Grand Pacific Resort
+
+## Occupancy Rates (Last 12 Months)
+
+### By Month
+- January: 68%
+- February: 72%
+- March: 75%
+- April: 79%
+- May: 74%
+- June: 82%
+- July: 89%
+- August: 91%
+- September: 77%
+- October: 73%
+- November: 69%
+- December: 85%
+
+### By Day of Week (Annual Average)
+- Monday: 65%
+- Tuesday: 68%
+- Wednesday: 71%
+- Thursday: 74%
+- Friday: 86%
+- Saturday: 92%
+- Sunday: 78%
+
+## Average Daily Rate (ADR) by Room Type (Last 12 Months)
+
+### Standard Room
+- Annual Average: $225
+- Peak Season (Jun-Aug): $275
+- Shoulder Season (Apr-May, Sep-Oct): $235
+- Off Season (Nov-Mar): $195
+
+### Deluxe Room
+- Annual Average: $295
+- Peak Season (Jun-Aug): $345
+- Shoulder Season (Apr-May, Sep-Oct): $305
+- Off Season (Nov-Mar): $265
+
+### Suite
+- Annual Average: $425
+- Peak Season (Jun-Aug): $525
+- Shoulder Season (Apr-May, Sep-Oct): $450
+- Off Season (Nov-Mar): $375
+
+## Booking Channels (% of Total Revenue)
+
+- Direct Website: 32%
+- Direct Phone/Email: 8%
+- Booking.com: 24%
+- Expedia: 18%
+- Travel Agents: 12%
+- Corporate Contracts: 6%
+
+## Booking Lead Time
+
+- Average Lead Time: 23 days
+- Peak Season Lead Time: 35 days
+- Off Season Lead Time: 14 days
+- Weekend Bookings Lead Time: 28 days
+- Weekday Bookings Lead Time: 19 days
+
+## Cancellation Patterns
+
+- Overall Cancellation Rate: 8.5%
+- Advance Purchase Rate Cancellations: 2.1%
+- Flexible Rate Cancellations: 12.4%
+- Average Days Before Arrival for Cancellation: 9 days
+
+## Guest Segments (% of Room Nights)
+
+- Leisure Individual: 45%
+- Business Individual: 22%
+- Leisure Group: 15%
+- Business Group/MICE: 10%
+- Extended Stay (5+ nights): 8%
+
+## Length of Stay
+
+- Average Length of Stay: 2.4 nights
+- Weekday Average: 1.8 nights
+- Weekend Average: 2.7 nights
+- Holiday Periods Average: 3.5 nights
+
+## RevPAR Performance
+
+- Annual Average: $176
+- Peak Season: $245
+- Shoulder Season: $182
+- Off Season: $138
+
+## Upselling and Ancillary Revenue
+
+- Room Upgrades: $18 per occupied room night
+- F&B Spend: $42 per occupied room night
+- Spa/Wellness: $15 per occupied room night
+- Other Services: $8 per occupied room night

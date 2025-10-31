@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'DynamoDB table for Hotel Revenue Optimization query history'
+
+Parameters:
+  AppName:
+    Type: String
+    Default: hotel-revenue-optimization
+    Description: Name of the application
+  
+  Environment:
+    Type: String
+    Default: dev
+    Description: Environment name (dev, test, prod)
+    AllowedValues:
+      - dev
+      - test
+      - prod
+
+Resources:
+  # DynamoDB Table for Query History
+  QueryHistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${AppName}-${Environment}-query-history
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AppName}-${Environment}-query-history
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: !Ref AppName
+
+Outputs:
+  QueryHistoryTableName:
+    Description: Name of the DynamoDB table for query history
+    Value: !Ref QueryHistoryTable
+    Export:
+      Name: !Sub ${AppName}-${Environment}-QueryHistoryTableName
+  
+  QueryHistoryTableArn:
+    Description: ARN of the DynamoDB table for query history
+    Value: !GetAtt QueryHistoryTable.Arn
+    Export:
+      Name: !Sub ${AppName}-${Environment}-QueryHistoryTableArn

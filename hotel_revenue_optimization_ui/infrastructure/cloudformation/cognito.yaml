@@ -1,0 +1,126 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cognito resources for Hotel Revenue Optimization UI'
+
+Parameters:
+  AppName:
+    Type: String
+    Description: Name of the application
+    Default: hotel-revenue-optimization
+  
+  Environment:
+    Type: String
+    Description: Deployment environment
+    Default: dev
+    AllowedValues:
+      - dev
+      - dev2
+      - dev3
+      - test
+      - prod
+
+  CloudFrontDomain:
+    Type: String
+    Description: CloudFront distribution domain name
+    Default: ""
+
+Conditions:
+  HasCloudFrontDomain: !Not [!Equals [!Ref CloudFrontDomain, ""]]
+
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${AppName}-${Environment}-user-pool
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      MfaConfiguration: 'OPTIONAL'
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          RequireUppercase: true
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${AppName}-${Environment}-client
+      UserPoolId: !Ref UserPool
+      GenerateSecret: true
+      SupportedIdentityProviders:
+        - COGNITO
+      CallbackURLs:
+        - !If 
+          - HasCloudFrontDomain
+          - !Sub "https://${CloudFrontDomain}/auth/callback"
+          - "http://localhost:5000/auth/callback"
+        - "http://localhost:5000/auth/callback"
+        - "https://localhost:5000/auth/callback"
+      LogoutURLs:
+        - !If 
+          - HasCloudFrontDomain
+          - !Sub "https://${CloudFrontDomain}/"
+          - "http://localhost:5000/"
+        - "http://localhost:5000/"
+        - "https://localhost:5000/"
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      AllowedOAuthFlowsUserPoolClient: true
+      PreventUserExistenceErrors: ENABLED
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: days
+        IdToken: days
+        RefreshToken: days
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub ${AppName}-${Environment}-${AWS::AccountId}
+      UserPoolId: !Ref UserPool
+
+Outputs:
+  UserPoolId:
+    Description: The ID of the Cognito User Pool
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub ${AppName}-${Environment}-UserPoolId
+
+  UserPoolClientId:
+    Description: The ID of the Cognito User Pool Client
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub ${AppName}-${Environment}-UserPoolClientId
+
+  UserPoolDomain:
+    Description: The domain name of the Cognito User Pool
+    Value: !Sub ${AppName}-${Environment}-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com
+    Export:
+      Name: !Sub ${AppName}-${Environment}-UserPoolDomain

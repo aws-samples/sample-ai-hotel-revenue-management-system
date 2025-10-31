@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Query History{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Query History</h1>
+    
+    <div class="alert alert-info mb-4">
+        <h5><i class="bi bi-clock-history"></i> Query History</h5>
+        <p class="mb-0">View your previous queries and analysis results. Click "View Result" to see full details and print reports.</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Previous Queries</h5>
+                </div>
+                <div class="card-body">
+                    {% if query_history %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Analysis Date</th>
+                                        <th>Optimization Goal</th>
+                                        <th>Analysis Scope</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in query_history %}
+                                    <tr>
+                                        <td>
+                                            <small class="text-muted">{{ item.timestamp | format_datetime }}</small>
+                                        </td>
+                                        <td>
+                                            {% set summary = item.query_summary | lower %}
+                                            {% if 'forecast' in summary or 'demand' in summary %}
+                                                <span class="badge bg-primary">Demand Forecasting</span>
+                                            {% elif 'optimize' in summary or 'revenue' in summary %}
+                                                <span class="badge bg-success">Revenue Optimization</span>
+                                            {% elif 'pricing' in summary or 'rate' in summary %}
+                                                <span class="badge bg-warning">Pricing Strategy</span>
+                                            {% elif 'competitor' in summary or 'competition' in summary %}
+                                                <span class="badge bg-info">Competitive Analysis</span>
+                                            {% elif 'occupancy' in summary %}
+                                                <span class="badge bg-secondary">Occupancy Improvement</span>
+                                            {% elif 'revpar' in summary %}
+                                                <span class="badge bg-dark">RevPAR Enhancement</span>
+                                            {% else %}
+                                                <span class="badge bg-light text-dark">Revenue Management</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if item.query_summary and not (item.query_summary | lower).startswith('query processed') %}
+                                                <div class="query-summary">{{ item.query_summary }}</div>
+                                            {% endif %}
+                                            {% if item.result_summary and not (item.result_summary | lower).startswith('query processed') %}
+                                                <small class="text-muted">{{ item.result_summary }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if item.result_status == 'success' %}
+                                                <span class="badge bg-success">Success</span>
+                                            {% elif item.result_status == 'partial_success' %}
+                                                <span class="badge bg-warning">Partial</span>
+                                            {% elif item.result_status == 'processing' %}
+                                                <span class="badge bg-info">Processing</span>
+                                            {% elif item.result_status == 'failed' %}
+                                                <span class="badge bg-danger">Failed</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ item.result_status|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if item.result_status in ['success', 'partial_success'] %}
+                                                <a href="{{ url_for('main.view_history_result', timestamp=item.timestamp) }}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-eye"></i> View Result
+                                                </a>
+                                            {% elif item.result_status == 'processing' %}
+                                                <button class="btn btn-sm btn-secondary" disabled>
+                                                    <i class="bi bi-hourglass-split"></i> Processing...
+                                                </button>
+                                            {% elif item.result_status == 'failed' %}
+                                                <a href="{{ url_for('main.view_history_result', timestamp=item.timestamp) }}" 
+                                                   class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-exclamation-triangle"></i> View Error
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">No result</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-clock-history display-1 text-muted"></i>
+                            <h4 class="mt-3">No Query History</h4>
+                            <p class="text-muted">You haven't submitted any queries yet.</p>
+                            <div class="mt-4">
+                                <a href="{{ url_for('main.natural_language') }}" class="btn btn-primary me-2">
+                                    <i class="bi bi-chat-dots"></i> Ask a Question
+                                </a>
+                                <a href="{{ url_for('main.structured_form') }}" class="btn btn-outline-primary">
+                                    <i class="bi bi-form-check"></i> Use Structured Form
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh every 5 seconds to show processing status updates
+    setInterval(function() {
+        // Check if there are any processing queries
+        const processingQueries = document.querySelectorAll('.badge-info');
+        if (processingQueries.length > 0) {
+            // Refresh the page to get updated status
+            window.location.reload();
+        }
+    }, 5000);
+    
+    // Add visual indicator for processing queries
+    const processingBadges = document.querySelectorAll('.badge-info');
+    processingBadges.forEach(function(badge) {
+        if (badge.textContent.includes('Processing')) {
+            // Add pulsing animation
+            badge.style.animation = 'pulse 2s infinite';
+            badge.parentElement.parentElement.style.opacity = '0.8';
+        }
+    });
+});
+</script>
+
+<style>
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+</style>
+{% endblock %}

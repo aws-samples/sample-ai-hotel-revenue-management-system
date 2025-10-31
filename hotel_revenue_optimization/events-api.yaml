@@ -1,0 +1,2870 @@
+openapi: 3.1.0
+info:
+  title: PredictHQ Events API
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://www.predicthq.com/legal/terms
+servers:
+  - url: https://api.predicthq.com
+externalDocs:
+  url: https://docs.predicthq.com
+  description: PredictHQ Tech Docs
+x-hideTryItPanel: true
+security:
+  - BearerAuth: []
+tags:
+  - name: Events API
+    externalDocs:
+      url: https://docs.predicthq.com/api/events
+      description: Events API Docs
+paths:
+  /v1/events/:
+    get:
+      operationId: searchEvents
+      tags:
+        - Events API
+      summary: Search Events
+      description: |-
+        Search for events happening in a location and date range. Use our extensive filters to narrow down your results.
+      parameters:
+        - $ref: '#/components/parameters/ActiveGteParam'
+        - $ref: '#/components/parameters/ActiveGtParam'
+        - $ref: '#/components/parameters/ActiveLteParam'
+        - $ref: '#/components/parameters/ActiveLtParam'
+        - $ref: '#/components/parameters/ActiveTzParam'
+        - $ref: '#/components/parameters/BeamAnalysisIdParam'
+        - $ref: '#/components/parameters/BeamGroupIdParam'
+        - $ref: '#/components/parameters/BrandUnsafeExcludeParam'
+        - $ref: '#/components/parameters/CancelledGteParam'
+        - $ref: '#/components/parameters/CancelledGtParam'
+        - $ref: '#/components/parameters/CancelledLteParam'
+        - $ref: '#/components/parameters/CancelledLtParam'
+        - $ref: '#/components/parameters/CancelledTzParam'
+        - $ref: '#/components/parameters/CategoryParam'
+        - $ref: '#/components/parameters/CountryParam'
+        - $ref: '#/components/parameters/DeletedReasonParam'
+        - $ref: '#/components/parameters/EndGteParam'
+        - $ref: '#/components/parameters/EndGtParam'
+        - $ref: '#/components/parameters/EndLteParam'
+        - $ref: '#/components/parameters/EndLtParam'
+        - $ref: '#/components/parameters/EndTzParam'
+        - $ref: '#/components/parameters/EndAroundOriginParam'
+        - $ref: '#/components/parameters/EndAroundOffsetParam'
+        - $ref: '#/components/parameters/EndAroundScaleParam'
+        - $ref: '#/components/parameters/EndAroundDecayParam'
+        - $ref: '#/components/parameters/EntityIdParam'
+        - $ref: '#/components/parameters/FirstSeenGteParam'
+        - $ref: '#/components/parameters/FirstSeenGtParam'
+        - $ref: '#/components/parameters/FirstSeenLteParam'
+        - $ref: '#/components/parameters/FirstSeenLtParam'
+        - $ref: '#/components/parameters/FirstSeenTzParam'
+        - $ref: '#/components/parameters/IdParam'
+        - $ref: '#/components/parameters/ImpactGteParam'
+        - $ref: '#/components/parameters/ImpactGtParam'
+        - $ref: '#/components/parameters/ImpactLteParam'
+        - $ref: '#/components/parameters/ImpactLtParam'
+        - $ref: '#/components/parameters/ImpactTzParam'
+        - $ref: '#/components/parameters/ImpactIndustryParam'
+        - $ref: '#/components/parameters/LabelParam'
+        - $ref: '#/components/parameters/LocalRankGteParam'
+        - $ref: '#/components/parameters/LocalRankGtParam'
+        - $ref: '#/components/parameters/LocalRankLteParam'
+        - $ref: '#/components/parameters/LocalRankLtParam'
+        - $ref: '#/components/parameters/LocalRankLevelParam'
+        - $ref: '#/components/parameters/LocationAroundOriginParam'
+        - $ref: '#/components/parameters/LocationAroundOffsetParam'
+        - $ref: '#/components/parameters/LocationAroundScaleParam'
+        - $ref: '#/components/parameters/LocationAroundDecayParam'
+        - $ref: '#/components/parameters/LocationConfidenceScoreGteParam'
+        - $ref: '#/components/parameters/LocationConfidenceScoreGtParam'
+        - $ref: '#/components/parameters/LocationConfidenceScoreLteParam'
+        - $ref: '#/components/parameters/LocationConfidenceScoreLtParam'
+        - $ref: '#/components/parameters/ParentIncludeParam'
+        - $ref: '#/components/parameters/PHQAttendanceGteParam'
+        - $ref: '#/components/parameters/PHQAttendanceGtParam'
+        - $ref: '#/components/parameters/PHQAttendanceLteParam'
+        - $ref: '#/components/parameters/PHQAttendanceLtParam'
+        - $ref: '#/components/parameters/PHQLabelParam'
+        - $ref: '#/components/parameters/PHQLabelOpParam'
+        - $ref: '#/components/parameters/PHQLabelExcludeParam'
+        - $ref: '#/components/parameters/PHQLabelExcludeOpParam'
+        - $ref: '#/components/parameters/PlaceScopeParam'
+        - $ref: '#/components/parameters/PlaceExactParam'
+        - $ref: '#/components/parameters/PlacekeyParam'
+        - $ref: '#/components/parameters/PostponedGteParam'
+        - $ref: '#/components/parameters/PostponedGtParam'
+        - $ref: '#/components/parameters/PostponedLteParam'
+        - $ref: '#/components/parameters/PostponedLtParam'
+        - $ref: '#/components/parameters/PostponedTzParam'
+        - $ref: '#/components/parameters/PredictedEndGteParam'
+        - $ref: '#/components/parameters/PredictedEndGtParam'
+        - $ref: '#/components/parameters/PredictedEndLteParam'
+        - $ref: '#/components/parameters/PredictedEndLtParam'
+        - $ref: '#/components/parameters/PredictedEndTzParam'
+        - $ref: '#/components/parameters/PredictedEventSpendGteParam'
+        - $ref: '#/components/parameters/PredictedEventSpendGtParam'
+        - $ref: '#/components/parameters/PredictedEventSpendLteParam'
+        - $ref: '#/components/parameters/PredictedEventSpendLtParam'
+        - $ref: '#/components/parameters/PredictedEventSpendIndustryParam'
+        - $ref: '#/components/parameters/QParam'
+        - $ref: '#/components/parameters/RankGteParam'
+        - $ref: '#/components/parameters/RankGtParam'
+        - $ref: '#/components/parameters/RankLteParam'
+        - $ref: '#/components/parameters/RankLtParam'
+        - $ref: '#/components/parameters/RankLevelParam'
+        - $ref: '#/components/parameters/RelevanceParam'
+        - $ref: '#/components/parameters/SavedLocationLocationIdParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/StartGteParam'
+        - $ref: '#/components/parameters/StartGtParam'
+        - $ref: '#/components/parameters/StartLteParam'
+        - $ref: '#/components/parameters/StartLtParam'
+        - $ref: '#/components/parameters/StartTzParam'
+        - $ref: '#/components/parameters/StartAroundOriginParam'
+        - $ref: '#/components/parameters/StartAroundOffsetParam'
+        - $ref: '#/components/parameters/StartAroundScaleParam'
+        - $ref: '#/components/parameters/StartAroundDecayParam'
+        - $ref: '#/components/parameters/StartDateConfidenceScoreGteParam'
+        - $ref: '#/components/parameters/StartDateConfidenceScoreGtParam'
+        - $ref: '#/components/parameters/StartDateConfidenceScoreLteParam'
+        - $ref: '#/components/parameters/StartDateConfidenceScoreLtParam'
+        - $ref: '#/components/parameters/StateParam'
+        - $ref: '#/components/parameters/UpdatedGteParam'
+        - $ref: '#/components/parameters/UpdatedGtParam'
+        - $ref: '#/components/parameters/UpdatedLteParam'
+        - $ref: '#/components/parameters/UpdatedLtParam'
+        - $ref: '#/components/parameters/UpdatedTzParam'
+        - $ref: '#/components/parameters/WithinParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/OffsetParam'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsResponse'
+  /v1/events/count/:
+    get:
+      operationId: countEvents
+      tags:
+        - Events API
+      summary: Get Event Counts
+      description: |-
+        Get the count of events by category, PHQ Label and more. The Count endpoint supports the same query parameters as the Search Events endpoint.
+      parameters:
+        - $ref: '#/components/parameters/ActiveGteParam'
+        - $ref: '#/components/parameters/ActiveGtParam'
+        - $ref: '#/components/parameters/ActiveLteParam'
+        - $ref: '#/components/parameters/ActiveLtParam'
+        - $ref: '#/components/parameters/ActiveTzParam'
+        - $ref: '#/components/parameters/BeamAnalysisIdParam'
+        - $ref: '#/components/parameters/BeamGroupIdParam'
+        - $ref: '#/components/parameters/BrandUnsafeExcludeParam'
+        - $ref: '#/components/parameters/CancelledGteParam'
+        - $ref: '#/components/parameters/CancelledGtParam'
+        - $ref: '#/components/parameters/CancelledLteParam'
+        - $ref: '#/components/parameters/CancelledLtParam'
+        - $ref: '#/components/parameters/CancelledTzParam'
+        - $ref: '#/components/parameters/CategoryParam'
+        - $ref: '#/components/parameters/CountryParam'
+        - $ref: '#/components/parameters/DeletedReasonParam'
+        - $ref: '#/components/parameters/EndGteParam'
+        - $ref: '#/components/parameters/EndGtParam'
+        - $ref: '#/components/parameters/EndLteParam'
+        - $ref: '#/components/parameters/EndLtParam'
+        - $ref: '#/components/parameters/EndTzParam'
+        - $ref: '#/components/parameters/EndAroundOriginParam'
+        - $ref: '#/components/parameters/EndAroundOffsetParam'
+        - $ref: '#/components/parameters/EndAroundScaleParam'
+        - $ref: '#/components/parameters/EndAroundDecayParam'
+        - $ref: '#/components/parameters/EntityIdParam'
+        - $ref: '#/components/parameters/FirstSeenGteParam'
+        - $ref: '#/components/parameters/FirstSeenGtParam'
+        - $ref: '#/components/parameters/FirstSeenLteParam'
+        - $ref: '#/components/parameters/FirstSeenLtParam'
+        - $ref: '#/components/parameters/FirstSeenTzParam'
+        - $ref: '#/components/parameters/IdParam'
+        - $ref: '#/components/parameters/ImpactGteParam'
+        - $ref: '#/components/parameters/ImpactGtParam'
+        - $ref: '#/components/parameters/ImpactLteParam'
+        - $ref: '#/components/parameters/ImpactLtParam'
+        - $ref: '#/components/parameters/ImpactTzParam'
+        - $ref: '#/components/parameters/ImpactIndustryParam'
+        - $ref: '#/components/parameters/LabelParam'
+        - $ref: '#/components/parameters/LocalRankGteParam'
+        - $ref: '#/components/parameters/LocalRankGtParam'
+        - $ref: '#/components/parameters/LocalRankLteParam'
+        - $ref: '#/components/parameters/LocalRankLtParam'
+        - $ref: '#/components/parameters/LocalRankLevelParam'
+        - $ref: '#/components/parameters/LocationAroundOriginParam'
+        - $ref: '#/components/parameters/LocationAroundOffsetParam'
+        - $ref: '#/components/parameters/LocationAroundScaleParam'
+        - $ref: '#/components/parameters/LocationAroundDecayParam'
+        - $ref: '#/components/parameters/LocationConfidenceScoreGteParam'
+        - $ref: '#/components/parameters/LocationConfidenceScoreGtParam'
+        - $ref: '#/components/parameters/LocationConfidenceScoreLteParam'
+        - $ref: '#/components/parameters/LocationConfidenceScoreLtParam'
+        - $ref: '#/components/parameters/ParentIncludeParam'
+        - $ref: '#/components/parameters/PHQAttendanceGteParam'
+        - $ref: '#/components/parameters/PHQAttendanceGtParam'
+        - $ref: '#/components/parameters/PHQAttendanceLteParam'
+        - $ref: '#/components/parameters/PHQAttendanceLtParam'
+        - $ref: '#/components/parameters/PHQLabelParam'
+        - $ref: '#/components/parameters/PHQLabelOpParam'
+        - $ref: '#/components/parameters/PHQLabelExcludeParam'
+        - $ref: '#/components/parameters/PHQLabelExcludeOpParam'
+        - $ref: '#/components/parameters/PlaceScopeParam'
+        - $ref: '#/components/parameters/PlaceExactParam'
+        - $ref: '#/components/parameters/PlacekeyParam'
+        - $ref: '#/components/parameters/PostponedGteParam'
+        - $ref: '#/components/parameters/PostponedGtParam'
+        - $ref: '#/components/parameters/PostponedLteParam'
+        - $ref: '#/components/parameters/PostponedLtParam'
+        - $ref: '#/components/parameters/PostponedTzParam'
+        - $ref: '#/components/parameters/PredictedEndGteParam'
+        - $ref: '#/components/parameters/PredictedEndGtParam'
+        - $ref: '#/components/parameters/PredictedEndLteParam'
+        - $ref: '#/components/parameters/PredictedEndLtParam'
+        - $ref: '#/components/parameters/PredictedEndTzParam'
+        - $ref: '#/components/parameters/PredictedEventSpendGteParam'
+        - $ref: '#/components/parameters/PredictedEventSpendGtParam'
+        - $ref: '#/components/parameters/PredictedEventSpendLteParam'
+        - $ref: '#/components/parameters/PredictedEventSpendLtParam'
+        - $ref: '#/components/parameters/PredictedEventSpendIndustryParam'
+        - $ref: '#/components/parameters/QParam'
+        - $ref: '#/components/parameters/RankGteParam'
+        - $ref: '#/components/parameters/RankGtParam'
+        - $ref: '#/components/parameters/RankLteParam'
+        - $ref: '#/components/parameters/RankLtParam'
+        - $ref: '#/components/parameters/RankLevelParam'
+        - $ref: '#/components/parameters/RelevanceParam'
+        - $ref: '#/components/parameters/SavedLocationLocationIdParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/StartGteParam'
+        - $ref: '#/components/parameters/StartGtParam'
+        - $ref: '#/components/parameters/StartLteParam'
+        - $ref: '#/components/parameters/StartLtParam'
+        - $ref: '#/components/parameters/StartTzParam'
+        - $ref: '#/components/parameters/StartAroundOriginParam'
+        - $ref: '#/components/parameters/StartAroundOffsetParam'
+        - $ref: '#/components/parameters/StartAroundScaleParam'
+        - $ref: '#/components/parameters/StartAroundDecayParam'
+        - $ref: '#/components/parameters/StartDateConfidenceScoreGteParam'
+        - $ref: '#/components/parameters/StartDateConfidenceScoreGtParam'
+        - $ref: '#/components/parameters/StartDateConfidenceScoreLteParam'
+        - $ref: '#/components/parameters/StartDateConfidenceScoreLtParam'
+        - $ref: '#/components/parameters/StateParam'
+        - $ref: '#/components/parameters/UpdatedGteParam'
+        - $ref: '#/components/parameters/UpdatedGtParam'
+        - $ref: '#/components/parameters/UpdatedLteParam'
+        - $ref: '#/components/parameters/UpdatedLtParam'
+        - $ref: '#/components/parameters/UpdatedTzParam'
+        - $ref: '#/components/parameters/WithinParam'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsCountResponse'
+components:
+  parameters:
+    ActiveGteParam:
+      in: query
+      name: active.gte
+      description: |-
+        Filters events that are active on or after the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ActiveGtParam:
+      in: query
+      name: active.gt
+      description: |-
+        Filters events that are active after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ActiveLteParam:
+      in: query
+      name: active.lte
+      description: |-
+        Filters events that are active on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ActiveLtParam:
+      in: query
+      name: active.lt
+      description: |-
+        Filters events that are active before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ActiveTzParam:
+      in: query
+      name: active.tz
+      description: |-
+        Specifies the timezone for the `active.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    BeamAnalysisIdParam:
+      in: query
+      name: beam.analysis_id
+      description: |-
+        An optional Beam Analysis filter which if provided will calculate the location, rank and categories from the Beam Analysis and optionally the Beam Analysis group (see `beam.group_id`).
+
+        This is the best way to filter for events relevant to your business based on your Beam Analysis.
+      required: false
+      schema:
+        type: string
+    BeamGroupIdParam:
+      in: query
+      name: beam.group_id
+      description: |-
+        If `beam.group_id` is provided the categories will be calculated from the feature importance results of the Analysis Group otherwise the categories will be calculated from the feature importance results of the individual Analysis.
+
+        If using `beam.group_id` the `beam.analysis_id` is required.
+      required: false
+      schema:
+        type: string
+    BrandUnsafeExcludeParam:
+      in: query
+      name: brand_unsafe.exclude
+      description: |-
+        Whether or not to exclude potentially brand-unsafe events. Potentially brand-unsafe events are included by default.
+
+        Examples of brand-unsafe events include content that promotes hate, violence or discrimination, coarse language, content that is sexually suggestive or explicit, etc.
+
+        Default: `false`
+      required: false
+      schema:
+        type: string
+        enum:
+          - "true"
+          - "false"
+    CancelledGteParam:
+      in: query
+      name: cancelled.gte
+      description: |
+        Filters events that were cancelled on or after the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    CancelledGtParam:
+      in: query
+      name: cancelled.gt
+      description: |
+        Filters events that were cancelled after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    CancelledLteParam:
+      in: query
+      name: cancelled.lte
+      description: |
+        Filters events that were cancelled on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    CancelledLtParam:
+      in: query
+      name: cancelled.lt
+      description: |
+        Filters events that were cancelled before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    CancelledTzParam:
+      in: query
+      name: cancelled.tz
+      description: |-
+        Specifies the timezone for the `cancelled.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    CategoryParam:
+      in: query
+      name: category
+      description: |-
+        A comma-separated list of categories.
+
+        Take a look at the [Event Categories](https://docs.predicthq.com/getting-started/predicthq-data/event-categories) page for an overview of the different categories.
+
+        Example: `concerts,sports`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - "academic"
+            - "school-holidays"
+            - "public-holidays"
+            - "observances"
+            - "politics"
+            - "conferences"
+            - "expos"
+            - "concerts"
+            - "festivals"
+            - "performing-arts"
+            - "sports"
+            - "community"
+            - "daylight-savings"
+            - "airport-delays"
+            - "severe-weather"
+            - "disasters"
+            - "terror"
+            - "health-warnings"
+      style: simple
+    CountryParam:
+      in: query
+      name: country
+      description: |-
+        A comma-separated list of 2-letter country codes.
+
+        Example: `US`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    DeletedReasonParam:
+      in: query
+      name: deleted_reason
+      description: |-
+        A comma-separated list of deleted reasons for the events.
+
+        Example: `cancelled,duplicate`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - cancelled
+            - invalid
+            - duplicate
+            - postponed
+      style: simple
+    EndGteParam:
+      in: query
+      name: end.gte
+      description: |-
+        Filters events that end on or after the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    EndGtParam:
+      in: query
+      name: end.gt
+      description: |-
+        Filters events that end after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    EndLteParam:
+      in: query
+      name: end.lte
+      description: |-
+        Filters events that end on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    EndLtParam:
+      in: query
+      name: end.lt
+      description: |-
+        Filters events that end before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    EndTzParam:
+      in: query
+      name: end.tz
+      description: |-
+        Specifies the timezone for the `end.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    EndAroundOriginParam:
+      in: query
+      name: end_around.origin
+      description: |-
+        Fuzzy date search around event end datetime. When using `end_around.*` params, `origin` is required.
+
+        Can influence `relevance`.
+
+        Example: `2025-02-01`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        format: date
+    EndAroundOffsetParam:
+      in: query
+      name: end_around.offset
+      description: |-
+        The number of days from the origin before the score starts to decay (optional).
+
+        Example: `5d`
+
+        Default: `0d`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        pattern: '^\d{1,3}d$'
+    EndAroundScaleParam:
+      in: query
+      name: end_around.scale
+      description: |-
+        Distance from origin +/- offset at which the score will equal the decay value (optional).
+
+        Example: `10d`
+
+        Default: `3d`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        pattern: '^\d{1,3}d$'
+    EndAroundDecayParam:
+      in: query
+      name: end_around.decay
+      description: |-
+        Score value at the scale distance (optional).
+
+        Example: `0.9`
+
+        Default: `0.5`
+      required: false
+      deprecated: true
+      schema:
+        type: number
+        format: double
+        minimum: 0.0
+        maximum: 1.0
+    EntityIdParam:
+      in: query
+      name: entity.id
+      description: |-
+        A comma-separated list of Entity identifiers.
+
+        Example: `XABWvihQAj8TnjvF6WNzLW`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    FirstSeenGteParam:
+      in: query
+      name: first_seen.gte
+      description: |-
+        Filters events that were first seen in our system on or after the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    FirstSeenGtParam:
+      in: query
+      name: first_seen.gt
+      description: |-
+        Filters events that were first seen in our system after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    FirstSeenLteParam:
+      in: query
+      name: first_seen.lte
+      description: |-
+        Filters events that were first seen in our system on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    FirstSeenLtParam:
+      in: query
+      name: first_seen.lt
+      description: |-
+        Filters events that were first seen in our system before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    FirstSeenTzParam:
+      in: query
+      name: first_seen.tz
+      description: |-
+        Specifies the timezone for the `first_seen.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    IdParam:
+      in: query
+      name: id
+      description: |-
+        A comma-separated list of Event identifiers.
+
+        Example: `z13B3870YOgv`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    ImpactGteParam:
+      in: query
+      name: impact.gte
+      description: |-
+        Filters events that are predicted to have an impact on or after the specified date.
+
+        The Predicted Impact Pattern of events can be larger than the actual event date range.
+
+        These parameters work similarly to the `active.*` parameter, but it uses an industry-specific Predicted Impact Pattern date range of an event where applicable.
+
+        You must also specify the industry (see `impact.industry`).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ImpactGtParam:
+      in: query
+      name: impact.gt
+      description: |-
+        Filters events that are predicted to have an impact after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ImpactLteParam:
+      in: query
+      name: impact.lte
+      description: |-
+        Filters events that are predicted to have an impact on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ImpactLtParam:
+      in: query
+      name: impact.lt
+      description: |-
+        Filters events that are predicted to have an impact before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ImpactTzParam:
+      in: query
+      name: impact.tz
+      description: |-
+        Specifies the timezone for the `impact.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    ImpactIndustryParam:
+      in: query
+      name: impact.industry
+      description: |-
+        Selected industry for the Predicted Impact Patterns.
+
+        If no industry is selected, `impact.*` will function effectively the same as `active.*`.
+
+        Example: `accommodation`
+      required: false
+      schema:
+        type: string
+        enum:
+          - "accommodation"
+          - "cpg"
+          - "tourism"
+          - "marketing"
+          - "parking"
+          - "restaurants"
+          - "retail"
+          - "transportation"
+    LabelParam:
+      in: query
+      name: label
+      description: |-
+        A comma-separated list of labels.
+
+        Please note that all event labels are lowercase and that the search is case sensitive.
+
+        The `label` param has been deprecated. Please update your integrations to use `phq_label` instead.
+
+        Example: `holiday,observance`
+      required: false
+      deprecated: true
+      schema:
+        $ref: '#/components/schemas/LegacyLabels'
+      style: simple
+    LocalRankGteParam:
+      in: query
+      name: local_rank.gte
+      description: |-
+        Filters events with a Local Rank greater than or equal to the specified value.
+
+        Example: `80`
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+    LocalRankGtParam:
+      in: query
+      name: local_rank.gt
+      description: |-
+        Filters events with a Local Rank greater than the specified value.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+    LocalRankLteParam:
+      in: query
+      name: local_rank.lte
+      description: |-
+        Filters events with a Local Rank less than or equal to the specified value.
+
+        Example: `90`
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+    LocalRankLtParam:
+      in: query
+      name: local_rank.lt
+      description: |-
+        Filters events with a Local Rank less than the specified value.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+    LocalRankLevelParam:
+      in: query
+      name: local_rank_level
+      description: |-
+        A comma-separated list of numbers between 1 and 5, corresponding to the Local Rank levels.
+
+        Possible values:
+
+        - 1 - Minor (rank between 0 and 20).
+        - 2 - Moderate (rank between 21 and 40).
+        - 3 - Important (rank between 41 and 60).
+        - 4 - Significant (rank between 61 and 80).
+        - 5 - Major (rank between 81 and 100).
+
+        Example: `4,5`
+      required: false
+      schema:
+        type: array
+        items:
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+      style: simple
+    LocationAroundOriginParam:
+      in: query
+      name: location_around.origin
+      description: |-
+        Fuzzy location search around event location. When using `location_around.*` params, `origin` is required.
+
+        Please note this affects the `relevance` value and does not restrict search results to the specified latitude/longitude and offset. Read more in the [Relevance guide](https://docs.predicthq.com/getting-started/guides/events-api-guides/understanding-relevance-field-in-event-results) and combine with the `within` parameter to restrict results to a specified latitude/longitude and radius.
+
+        Example: `40.730610,-73.935242`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
+    LocationAroundOffsetParam:
+      in: query
+      name: location_around.offset
+      description: |-
+        The distance before decay is applied (optional).
+
+        Distance unit can be one of `m`, `km`, `ft`, `mi`.
+
+        Example: `2mi`
+
+        Default: `0km`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        pattern: '^\d+(m|km|ft|mi)$'
+    LocationAroundScaleParam:
+      in: query
+      name: location_around.scale
+      description: |-
+        Distance from origin + offset at which the score will equal decay value (optional).
+
+        Distance unit can be one of `m`, `km`, `ft`, `mi`.
+
+        Example: `4mi`
+
+        Default: `2km`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        pattern: '^\d+(m|km|ft|mi)$'
+    LocationAroundDecayParam:
+      in: query
+      name: location_around.decay
+      description: |-
+        Score value at the `scale` distance (optional).
+
+        Example: `0.9`
+
+        Default: `0.5`
+      required: false
+      deprecated: true
+      schema:
+        type: number
+        format: double
+        minimum: 0.0
+        maximum: 1.0
+    LocationConfidenceScoreGteParam:
+      in: query
+      name: location_confidence_score.gte
+      description: |-
+        A unique attribute to Predicted Events that were generated from analyzing sets of recurring events. The score ranges from 1 to 5, representing the event’s propensity to change location with each recurrence. Higher scores indicate a higher consistency in location, while lower scores indicate the event’s location is more likely to shift once additional details become available.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    LocationConfidenceScoreGtParam:
+      in: query
+      name: location_confidence_score.gt
+      description: |-
+        Filters events with a location confidence score greater than the specified score (exclusive).
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    LocationConfidenceScoreLteParam:
+      in: query
+      name: location_confidence_score.lte
+      description: |-
+        Filters events with a location confidence score less than or equal to the specified score.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    LocationConfidenceScoreLtParam:
+      in: query
+      name: location_confidence_score.lt
+      description: |-
+        Filters events with a location confidence score less than the specified score (exclusive).
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    ParentIncludeParam:
+      in: query
+      name: parent.include
+      description: |-
+        Whether or not to include parent events / exclude child events.
+
+        Note that child events are those events that have a link to a parent event.
+        Parent events are all the other events, whether they have children or not.
+
+        See the documentation on [umbrella events](https://docs.predicthq.com/getting-started/guides/date-and-time-guides/working-with-multi-day-and-umbrella-events#umbrella-events-beta) for more information on parent and child events.
+
+        Default: `true`
+      required: false
+      schema:
+        type: string
+        enum:
+          - "true"
+          - "false"
+          - "only"
+    PHQAttendanceGteParam:
+      in: query
+      name: phq_attendance.gte
+      description: |-
+        Filters events with a Predicted Attendance greater than or equal to the specified value.
+
+        Example: `2000`
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    PHQAttendanceGtParam:
+      in: query
+      name: phq_attendance.gt
+      description: |-
+        Filters events with a Predicted Attendance greater than the specified value.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    PHQAttendanceLteParam:
+      in: query
+      name: phq_attendance.lte
+      description: |-
+        Filters events with a Predicted Attendance less than or equal to the specified value.
+
+        Example: `10000`
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    PHQAttendanceLtParam:
+      in: query
+      name: phq_attendance.lt
+      description: |-
+        Filters events with a Predicted Attendance less than the specified value.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    PHQLabelParam:
+      in: query
+      name: phq_label
+      description: |-
+        A comma-separated list of PHQ labels.
+
+        PHQ Labels leverage AI and classifier models for more accurate labelling.
+
+        Please note that all event labels are lowercase and that the search is case sensitive.
+
+        Take a look at [PHQ Label Values](https://docs.predicthq.com/getting-started/predicthq-data/labels#phq-label-values) to get a list of possible values.
+
+        Example: `agriculture-forestry-and-fisheries,food-and-beverage`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    PHQLabelOpParam:
+      in: query
+      name: phq_label.op
+      description: |-
+        Whether to find events with `any` or `all` the specified labels.
+
+        Default: `any`
+      required: false
+      schema:
+        type: string
+        enum:
+          - "all"
+          - "any"
+    PHQLabelExcludeParam:
+      in: query
+      name: phq_label.exclude
+      description: |-
+        A comma-separated list of PHQ labels to exclude. This will filter for events that do not have the specified labels.
+
+        Please note that all event labels are lowercase and that the search is case sensitive.
+
+        Example: `lifestyle`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    PHQLabelExcludeOpParam:
+      in: query
+      name: phq_label.exclude.op
+      description: |-
+        Whether to exclude events with `any` or `all` the specified labels.
+
+        Default: `any`
+      required: false
+      schema:
+        type: string
+        enum:
+          - "all"
+          - "any"
+    PlaceScopeParam:
+      in: query
+      name: place.scope
+      description: |-
+        A comma-separated list of Place IDs and/or IATA (3 character), ICAO (4 character), and UN/LOCODE (5 character) airport codes where the events occur.
+
+        A CSV file of all supported airport codes and their respective Place IDs is available to download.
+
+        Results will contain events that apply to the parent and children places of the specified place. E.g. National, regional and local school holidays that apply to a region.
+
+        Example: `5128638,SFO`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    PlaceExactParam:
+      in: query
+      name: place.exact
+      description: |-
+        A comma-separated list of Place IDs and/or IATA (3 character), ICAO (4 character), and UN/LOCODE (5 character) airport codes where the events occur.
+
+        Results will contain events that apply to the specified place only. E.g. Regional school holidays only.
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    PlacekeyParam:
+      in: query
+      name: placekey
+      description: |-
+        A comma-separated list of Placekeys (See [placekey.io](https://www.placekey.io/)). Returns events that have a Placekey value matching this filter.
+
+        There are 2 parts to a Placekey: `what@where`
+
+        - `what` Contains 2 part in the form `{address}-{poi}`.
+          - The first part represents an address.
+          - The second part represents a Point Of Interest (E.g. named venue). This will be missing on locations that only have addresses
+        - `where` An H3 hexagon index (resolution 10) of the event.
+
+        This filter supports entering a full Placekey to match events having that specific Placekey or a partial Placekey (such as just the `@where` part) to perform a partial match on Placekey. You can use the following Placekey format in this filter:
+
+        - `{address}-{poi}@{where}` - only returns events with a full matching placekey (an exact match)
+        - `{address}@{where}` - matches events where the the address and where part match (even if poi is different)
+        - `@{where}` - matches events for which the `@where` part matches, ignores the `{address}-{poi}` parts. You can perform a partial match on the `@where` part to find nearby events. The minimum amount of characters that can be matched on is 5. See [using Placekey](https://docs.predicthq.com/getting-started/guides/geolocation-guides/searching-by-location/find-events-by-placekey) for more details.
+
+
+        Note that Placekey applies to our attended event categories. Some events do not contain a Placekey.
+
+        Example: `225@63j-rqb-j7q,@627-s8j-z2k`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    PostponedGteParam:
+      in: query
+      name: postponed.gte
+      description: |-
+        Filters events that were marked as postponed on or after the specified date.
+
+        Note when filtering on postponed, events that are not postponed will not be returned.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    PostponedGtParam:
+      in: query
+      name: postponed.gt
+      description: |-
+        Filters events that were marked as postponed after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    PostponedLteParam:
+      in: query
+      name: postponed.lte
+      description: |-
+        Filters events that were marked as postponed on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    PostponedLtParam:
+      in: query
+      name: postponed.lt
+      description: |-
+        Filters events that were marked as postponed before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    PostponedTzParam:
+      in: query
+      name: postponed.tz
+      description: |-
+        Specifies the timezone for the `postponed.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    PredictedEndGteParam:
+      in: query
+      name: predicted_end.gte
+      description: |-
+        Filters events that are predicted to end on or after the specified date.
+
+        Note when filtering on postponed, events that are not postponed will not be returned.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    PredictedEndGtParam:
+      in: query
+      name: predicted_end.gt
+      description: |-
+        Filters events that are predicted to end after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    PredictedEndLteParam:
+      in: query
+      name: predicted_end.lte
+      description: |-
+        Filters events that are predicted to end on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    PredictedEndLtParam:
+      in: query
+      name: predicted_end.lt
+      description: |-
+        Filters events that are predicted to end before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    PredictedEndTzParam:
+      in: query
+      name: predicted_end.tz
+      description: |-
+        Specifies the timezone for the `predicted_end.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    PredictedEventSpendGteParam:
+      in: query
+      name: predicted_event_spend.gte
+      description: |-
+        Filters events with a Predicted Event Spend (USD) greater or equal to the specified value.
+
+        Note: When using this filter events that do not have a  predicted_event_spend  will not be returned.
+
+        Example: `80000`
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    PredictedEventSpendGtParam:
+      in: query
+      name: predicted_event_spend.gt
+      description: |-
+        Filters events with a Predicted Event Spend greater than the specified value (exclusive).
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    PredictedEventSpendLteParam:
+      in: query
+      name: predicted_event_spend.lte
+      description: |-
+        Filters events with a Predicted Event Spend less than or equal to the specified value.
+
+        Example: `200000`
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    PredictedEventSpendLtParam:
+      in: query
+      name: predicted_event_spend.lt
+      description: |-
+        Filters events with a Predicted Event Spend less than the specified value (exclusive).
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    PredictedEventSpendIndustryParam:
+      in: query
+      name: predicted_event_spend_industry.<industry>.<suffix>
+      description: |-
+        The Predicted Event Spend for a given industry in USD.
+
+        Supported industries:
+        - accommodation
+        - hospitality
+        - transportation
+
+        The format of this parameter name is: `predicted_event_spend_industry.<industry>.<suffix>`
+
+        Supports `gt`, `gte`, `lt` and `lte` suffixes in the same way other range parameters are supported.
+
+        Please note that use of a suffix is required.
+
+        Note: When using this filter events that do not have a `predicted_event_spend` will not be returned.
+      required: false
+      schema:
+        type: integer
+    QParam:
+      in: query
+      name: q
+      description: |-
+        A full-text search query.
+
+        Can influence `relevance`.
+
+        Example: `katy perry`
+      schema:
+        type: string
+    RankGteParam:
+      in: query
+      name: rank.gte
+      description: |-
+        Filters events with a PHQ Rank greater than or equal to the specified value.
+
+        Example: `80`
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+    RankGtParam:
+      in: query
+      name: rank.gt
+      description: |-
+        Filters events with a PHQ Rank greater than the specified value.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+    RankLteParam:
+      in: query
+      name: rank.lte
+      description: |-
+        Filters events with a PHQ Rank less than or equal to the specified value.
+
+        Example: `90`
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+    RankLtParam:
+      in: query
+      name: rank.lt
+      description: |-
+        Filters events with a PHQ Rank less than the specified value.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+    RankLevelParam:
+      in: query
+      name: rank_level
+      description: |-
+        A comma-separated list of numbers between 1 and 5, corresponding to the PHQ Rank levels.
+
+        Possible values:
+
+        - 1 - Minor (rank between 0 and 20).
+        - 2 - Moderate (rank between 21 and 40).
+        - 3 - Important (rank between 41 and 60).
+        - 4 - Significant (rank between 61 and 80).
+        - 5 - Major (rank between 81 and 100).
+
+        Example: `4,5`
+      required: false
+      schema:
+        type: array
+        items:
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+      style: simple
+    RelevanceParam:
+      in: query
+      name: relevance
+      description: |-
+        A comma-separated list of components to include when calculating the `relevance` field of an event. The relevance components are multiplied together to produce the overall relevance.
+
+        Parameter Components:
+        These components correspond to search parameters that can influence relevance. If the parameter isn't provided as part of a search its component will be ignored. By default, relevance includes the components of each relevance-influencing parameter in a search.
+
+        - q
+        - start_around
+        - end_around
+        - location_around
+
+        Field Components:
+        These components correspond to event fields that can be included in relevance. They are not included in relevance by default.
+
+        - rank
+        - local_rank
+
+        Example: `q,rank,location_around`
+      required: false
+      deprecated: true
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - q
+            - start_around
+            - end_around
+            - location_around
+            - rank
+            - local_rank
+      style: simple
+    SavedLocationLocationIdParam:
+      in: query
+      name: saved_location.location_id
+      description: |-
+        A comma-separated list of saved location identifiers. Up to a maximum of 20 identifiers. This filters the events returned to events within the locations specified. Refer to the Saved Locations API for more details on managing locations.
+
+        Example: `sFlb8HlsLa1j-S4UDEMEkQ`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+    SortParam:
+      in: query
+      name: sort
+      description: |-
+        A comma-separated list of fields to sort results by. The default is `relevance,-start`.
+
+        Prefix the field name with `-` for reverse order.
+
+        Note when sorting on `predicted_end` or `local_rank` (regardless of sort order), events that do not have a `predicted_end`, `local_rank` will be placed last.
+
+        When sorting by `relevance` the most relevant results are sorted first, regardless of sort order.
+
+        Example: `country,-start`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - id
+            - title
+            - start
+            - end
+            - first_seen
+            - predicted_end
+            - updated
+            - rank
+            - local_rank
+            - phq_attendance
+            - category
+            - duration
+            - country
+            - labels
+            - relevance
+            - predicted_event_spend
+            - predicted_event_spend_industry.accommodation
+            - predicted_event_spend_industry.hospitality
+            - predicted_event_spend_industry.transportation
+      style: simple
+    StartGteParam:
+      in: query
+      name: start.gte
+      description: |-
+        Filters events that start on or after the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    StartGtParam:
+      in: query
+      name: start.gt
+      description: |-
+        Filters events that start after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    StartLteParam:
+      in: query
+      name: start.lte
+      description: |-
+        Filters events that start on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    StartLtParam:
+      in: query
+      name: start.lt
+      description: |-
+        Filters events that start before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    StartTzParam:
+      in: query
+      name: start.tz
+      description: |-
+        Specifies the timezone for the `start.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    StartAroundOriginParam:
+      in: query
+      name: start_around.origin
+      description: |-
+        Fuzzy date search around event start datetime. When using `start_around.*` params, `origin` is required.
+
+        Can influence `relevance`.
+
+        Example: `2025-02-01`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        format: date
+    StartAroundOffsetParam:
+      in: query
+      name: start_around.offset
+      description: |-
+        The number of days from the origin before the score starts to decay (optional).
+
+        Example: `5d`
+
+        Default: `0d`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        pattern: '^\d{1,3}d$'
+    StartAroundScaleParam:
+      in: query
+      name: start_around.scale
+      description: |-
+        Distance from origin +/- offset at which the score will equal the decay value (optional).
+
+        Example: `10d`
+
+        Default: `3d`
+      required: false
+      deprecated: true
+      schema:
+        type: string
+        pattern: '^\d{1,3}d$'
+    StartAroundDecayParam:
+      in: query
+      name: start_around.decay
+      description: |-
+        Score value at the scale distance (optional).
+
+        Example: `0.9`
+
+        Default: `0.5`
+      required: false
+      deprecated: true
+      schema:
+        type: number
+        format: double
+        minimum: 0.0
+        maximum: 1.0
+    StartDateConfidenceScoreGteParam:
+      in: query
+      name: start_date_confidence_score.gte
+      description: |-
+        A unique attribute to Predicted Events that were generated from analyzing sets of recurring events. The score ranges from 1 to 5, representing the event’s consistency in being held around the same date with each recurrence. Higher scores indicate the event is held at mostly the same date each year, while lower scores indicate a greater variation in start date, meaning that details are more likely to change as new details become available.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    StartDateConfidenceScoreGtParam:
+      in: query
+      name: start_date_confidence_score.gt
+      description: |-
+        Filters events with a start date confidence score greater than the specified score (exclusive).
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    StartDateConfidenceScoreLteParam:
+      in: query
+      name: start_date_confidence_score.lte
+      description: |-
+        Filters events with a start date confidence score less than or equal to the specified score.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    StartDateConfidenceScoreLtParam:
+      in: query
+      name: start_date_confidence_score.lt
+      description: |-
+        Filters events with a start date confidence score less than the specified score (exclusive).
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5
+    StateParam:
+      in: query
+      name: state
+      description: |-
+        A comma-separated list of states for the events.
+
+        This parameter is useful in conjunction with `updated` when you cache events and are interested in retrieving a list of all events that have changed since a specific date and time.
+
+        Example: `active,deleted`
+
+        Default: `active`
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - "active"
+            - "deleted"
+            - "predicted"
+      style: simple
+    UpdatedGteParam:
+      in: query
+      name: updated.gte
+      description: |-
+        Filters events that were last modified on or after the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-01-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    UpdatedGtParam:
+      in: query
+      name: updated.gt
+      description: |-
+        Filters events that were last modified after the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    UpdatedLteParam:
+      in: query
+      name: updated.lte
+      description: |-
+        Filters events that were last modified on or before the specified date.
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+
+        Example: `2025-02-01`
+      required: false
+      schema:
+        type: string
+        format: date-time
+    UpdatedLtParam:
+      in: query
+      name: updated.lt
+      description: |-
+        Filters events that were last modified before the specified date (exclusive).
+
+        Expected format: `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`.
+      required: false
+      schema:
+        type: string
+        format: date-time
+    UpdatedTzParam:
+      in: query
+      name: updated.tz
+      description: |-
+        Specifies the timezone for the `updated.*` date parameters.
+
+        Timezone must be in the [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format (e.g. `America/Los_Angeles`).
+
+        Default: `UTC`
+      required: false
+      schema:
+        type: string
+    WithinParam:
+      in: query
+      name: within
+      description: |-
+        A geo center and radius in the form `{radius}{unit}@{latitude},{longitude}`, where the radius unit can be one of: `m`, `km`, `ft`, `mi`.
+
+        When using the units of `km` and `mi` you can enter whole numbers or floats e.g. `5mi`, `1.5km` or `1.2mi`.
+        When using the units `ft` or `m` you must enter whole numbers (you cannot enter a fraction of a meter or foot).
+
+        Note that results may contain events that apply to a parent scope of the specified area.
+
+        Note we always recommend using our Suggested Radius API to determine the relevant impact zone around your location.
+
+        Example: `2.5mi@-36.844480,174.768368`
+      required: false
+      schema:
+        type: string
+        pattern: ^(?:(?:[1-9]\d*(?:\.\d+)?(km|mi))|(?:[1-9]\d*(m|ft)))@-?\d+(?:\.\d+)?,\-?\d+(?:\.\d+)?$
+    LimitParam:
+      name: limit
+      in: query
+      description: Limit the number of results.
+      required: false
+      schema:
+        type: integer
+        default: 10
+    OffsetParam:
+      name: offset
+      in: query
+      description: Offset the results.
+      required: false
+      schema:
+        type: integer
+        default: 0
+  schemas:
+    Event:
+      type: object
+      description: An individual event object.
+      properties:
+        brand_safe:
+          description: |-
+            Indicates whether or not the event is considered "brand safe".
+          type: boolean
+        cancelled:
+          description: |-
+            The date the event was set to cancelled in the system in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+            Dates are in UTC.
+
+            This field will only be present for events with `deleted_reason` set to `cancelled`, and will have a `null` value if `cancelled` date is not available.
+          type:
+            - string
+            - "null"
+          format: date-time
+        category:
+          description: |-
+            The category of the event.
+          $ref: '#/components/schemas/EventCategory'
+        country:
+          description: |-
+            The country code in [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) format.
+            Note that the country value will usually be present but in some cases where the event location is not within a country (e.g. an earthquake in the middle of the ocean) it can be empty.
+          type: string
+          examples:
+            - "US"
+        deleted_reason:
+          description: |-
+            The reason why the event was deleted.
+
+            Note that this field is only present for events with state `deleted`.
+          type: string
+          enum:
+            - "cancelled"
+            - "duplicate"
+            - "invalid"
+            - "postponed"
+        description:
+          description: |-
+            A description of the event.
+          type:
+            - string
+            - "null"
+          examples:
+            - "See Katy Perry in concert [...]"
+        duplicate_of_id:
+          description: |-
+            The `id` of the active event this event is a duplicate of.
+
+            Note that this field is only present for deleted events with `deleted_reason` set to `duplicate`.
+          type:
+            - string
+            - "null"
+        duration:
+          description: |-
+            The duration of the event in seconds.
+          type: integer
+          examples:
+            - 3600
+        end:
+          description: |-
+            The end date of the event in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+            All end dates are in UTC if the event time zone is provided, and in local time otherwise. For example, Independence Day falls on the 4th of July regardless of the time zone, and will have a `null` time zone.
+          type:
+            - string
+            - "null"
+          format: date-time
+        end_local:
+          description: |-
+            The end date in local time of the event in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+            The `end` field is in UTC and `end_local` is in the local time at the events location.
+          type:
+            - string
+            - "null"
+          format: date-time
+        entities:
+          description: |-
+            An array of Entities linked to the event.
+
+            Read the [Entities data guide](https://docs.predicthq.com/getting-started/predicthq-data/entities) for more info.
+          type: array
+          items:
+            type: object
+            required:
+              - entity_id
+              - name
+              - type
+            properties:
+              entity_id:
+                type: string
+              type:
+                type: string
+                enum:
+                  - event-group
+                  - person
+                  - venue
+                  - organisation
+              labels:
+                type: array
+                items:
+                  type: string
+              name:
+                type: string
+              description:
+                type: string
+              category:
+                $ref: '#/components/schemas/EventCategory'
+              formatted_address:
+                type: string
+              timezone:
+                type: string
+              recurring:
+                type: object
+                required:
+                  - ical
+                properties:
+                  ical:
+                    type: string
+            examples:
+              - entity_id: 39yXYp4LvTW8TicddxHSiXw
+                type: event-group
+                labels:
+                  - recurring
+                name: Underwood Family Farms Fall Harvest Festival
+                recurring:
+                  ical: "DTSTART;VALUE=DATE-TIME:20170930T090000 DURATION:P31DT9H RRULE:FREQ=YEARLY;INTERVAL=1"
+              - entity_id: fx5IMIphsUX7yoJ9X7PktQ
+                type: event-group
+                labels:
+                  - residency
+                name: Taylor Swift at Anfield
+              - entity_id: 328DxFUbRKvaiJJGyT2gReF
+                type: venue
+                name: Spark Arena
+                formatted_address: "Mahuhu Crescent\nAuckland 1010\nNew Zealand"
+        first_seen:
+          description: |-
+            The date the event first entered our dataset in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. Dates are in UTC. This value may be missing on some events, and should not be considered an event announcement date.
+          type:
+            - string
+            - "null"
+          format: date-time
+        id:
+          description: |-
+            The unique identifier of the event.
+          type: string
+          examples:
+            - z13B3870YOgv
+        impact_patterns:
+          description: |-
+            This field shows the Predicted Impact Patterns for leading days (days before the event), lagging days (days after an event), and the days the event occurs. See [Predicted Impact Patterns](https://docs.predicthq.com/getting-started/predicthq-data/impact-patterns) for more details.
+
+            This field will only be present if you have access to it in your subscription and you will only get the industry verticals that you are subscribed to.
+
+            impact_patterns is an array of impact pattern objects. The same event can have different impact patterns for different industry verticals. It contains the following fields:
+          type: object
+          required:
+            - vertical
+            - impact_type
+            - impacts
+          properties:
+            vertical:
+              description: |-
+                The industry vertical the impact pattern applies to.
+              type: string
+              enum:
+                - accommodation
+                - retail
+                - hospitality
+            impact_type:
+              description: |-
+                Indicates the type of impact shown in the impact pattern. Currently, the supported types are phq_rank and phq_attendance. If the impact_type is phq_rank then the impact values shown per day reflect phq_rank values. If impact_type is phq_attendance then the impact values per day reflect phq_attendance which is the estimated amount of people attending the event per day.
+              type: string
+              enum:
+                - phq_rank
+                - phq_attendance
+            impacts:
+              type: array
+              items:
+                type: object
+                required:
+                  - date_local
+                  - value
+                  - position
+                properties:
+                  date_local:
+                    description: |-
+                      The date in the local timezone of the event.
+                    type: string
+                    format: date
+                  value:
+                    description: |-
+                      The value of the `impact_type` for that given day. For example, if the `impact_type` was `phq_rank` the `value` would be the PHQ Rank value on the given day. Otherwise, it will reflect `phq_attendance`.
+                    type: integer
+                  position:
+                    description: |-
+                      - `leading` are the days before the event occurs.
+                      - `event_day` are the days the event occurs.
+                      - `lagging` are the days after the event has occurred.
+                    type: string
+                    enum:
+                      - leading
+                      - event_day
+                      - lagging
+        labels:
+          $ref: '#/components/schemas/LegacyLabels'
+        local_rank:
+          description: |-
+            Similar to PHQ Rank, this is a log scale numerical value between 0 and 100 with a five-level hierarchical impact schema. It is designed to represent the potential impact of an event on its local geographical area.
+
+            If `local_rank` is not intended to be available for an event, this field will be `null`.
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          maximum: 100
+        location:
+          description: |-
+            A 2-tuple representing the geo location of the event. Note that the longitude/latitude coordinates use the [GeoJSON](https://geojson.org/) order [lon, lat].
+
+            Please use the `geo` field instead of this field.
+          deprecated: true
+          type: array
+          items:
+            type: number
+          minItems: 2
+          maxItems: 2
+          examples:
+            - [174.776792, -36.847319]
+        location_confidence_score:
+          description: |-
+            The Predicted Event location confidence score.
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          maximum: 5
+        geo:
+          description: |-
+            An object containing the geographic information about an event. This field will be used in future instead of the `location` field (the `location` field will remain in the current version of the API but could be removed in future versions).
+          oneOf:
+            - type: object
+              properties:
+                geometry:
+                  $ref: '#/components/schemas/Geometry'
+                placekey:
+                  description: |-
+                    The Placekey (See [placekey.io](https://www.placekey.io/)) reflects the location of an event in the format what@where. Placekey is part of the geo field for an event.
+
+                    Possible formats:
+                    - `{address}-{poi}@{where}`
+                    - `{address)@{where}`
+                    - `@where`
+
+                    Some events do not contain a Placekey.
+                  type: string
+                  examples:
+                    - "222-229@8t2-fgc-z2k"
+                    - "@7f7-mcy-ndv"
+                address:
+                  oneOf:
+                    - type: object
+                      required:
+                        - country_code
+                      properties:
+                        country_code:
+                          type: string
+                          examples:
+                            - "US"
+                        formatted_address:
+                          type: string
+                          examples:
+                            - "2350 Beach Blvd, Biloxi, MS 39531, USA"
+                        locality:
+                          type: string
+                          examples:
+                            - "Biloxi"
+                        region:
+                          type: string
+                          examples:
+                            - "Mississippi"
+                        postcode:
+                          type: string
+                          examples:
+                            - "39531"
+                    - type: 'null'
+            - type: 'null'
+        parent_event:
+          description: |-
+            Used to indicate if this event is part of a larger event. These types of events are called umbrella events in the system. For example, a large multi-day parent umbrella event may have individual child events for sessions on different days. For example the Formula 1 2019 United States Grand Prix has child events for the qualification, 3 practice events, a concert that occurs at the Grand Prix, and the actual race events (there are 12 child events).
+
+            See [umbrella events](https://docs.predicthq.com/getting-started/guides/date-and-time-guides/working-with-multi-day-and-umbrella-events#umbrella-events-beta) for details on this field and details on what umbrella events are.
+
+            Note that this field shows if a child event has a parent id. It does not indicate if a parent event has child events.
+          type: object
+          required:
+            - parent_event_id
+          properties:
+            parent_event_id:
+              description: |-
+                The parent_event_id refers to the id of the event that is the parent for the current event.
+              type: string
+              examples:
+                - w7dYyrFwTUQGYE6euv
+        phq_attendance:
+          description: |-
+            A numerical value that reflects the predicted attendance for supported attendance-based categories.
+
+            This reflects the entire attendance for multi-day events (the number of people attending across the full duration of the event) except for some categories like conferences where it is the daily attendance.
+
+            See [Handling multi-day and Umbrella events](https://docs.predicthq.com/getting-started/guides/date-and-time-guides/working-with-multi-day-and-umbrella-events) for more details.
+          type:
+            - integer
+            - "null"
+          examples:
+            - 2511
+        phq_labels:
+          description: |-
+            An array of objects which contains the PHQ Labels associated to an event as well as the weight that they contribute to the event. Weights from all labels should sum up to 1.0
+
+            PHQ Labels leverage AI and classifier models. Currently available for conferences, expos, festivals, community and performing-arts categories. Legacy labels are available in a separate field to preserve backwards compatibility.
+
+            Take a look at [PHQ Label Values](https://docs.predicthq.com/getting-started/predicthq-data/labels#phq-label-values) to see a list of possible values that could be in phq_labels.label.
+          type: array
+          items:
+            type: object
+            required:
+              - label
+              - weight
+            properties:
+              label:
+                type: string
+              weight:
+                type: number
+                minimum: 0.0
+                maximum: 1.0
+          examples:
+            - - label: agriculture-forestry-and-fisheries
+                weight: 0.376
+              - label: food-and-beverage
+                weight: 0.263
+              - label: art-and-cultural
+                weight: 0.186
+              - label: science-and-technology
+                weight: 0.175
+        place_hierarchies:
+          description: |-
+            An array of place hierarchies for the event. Each hierarchy is an array of place IDs. The final place in a hierarchy is a specific place the event applies to. Each place is a sub-place of the place immediately preceding it in the hierarchy.
+
+            For example, a hierarchy might contain the following places in this order: `Earth > Europe > United Kingdom > England > Nottingham`
+
+            Note that the place_hierarchies value can be an empty array in some cases.
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+          examples:
+            - - - "6295630"
+                - "6255148"
+                - "2635167"
+                - "6269131"
+                - "3333178"
+                - "2641170"
+        postponed:
+          description: |-
+            The date the event was set to postponed in the system in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. Dates are in UTC.
+
+            This field will only be present for events with deleted_reason set to postponed, and will have a null value if postponed date is not available.
+          type: string
+          format: date-time
+        predicted_end:
+          description: |-
+            The predicted end date of the event in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+            Predicted end dates are in UTC if the event time zone is provided, and in local time otherwise. For example, Independence Day falls on the 4th of July regardless of the time zone, and will have a `null` time zone.
+
+            This field will only be present if an actual `end` time is not available for an event and we have a predicted end time.
+          type: string
+          format: date-time
+        predicted_end_local:
+          description: |-
+            The predicted end date in the local time of the event in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+            The `predicted_end` field is in UTC and `predicted_end_local` is in the local time in the time zone at the location of the event.
+
+            This field will only be present if an actual `end` time is not available for an event and we have a predicted end time.
+          type: string
+          format: date-time
+        predicted_event_spend:
+          description: |-
+            The total Predicted Event Spend across all supported industries for an event in USD. This figure represents the consumer spend impact on local businesses that the event is predicted to generate.
+          type: integer
+          examples:
+            - 11806680
+        predicted_event_spend_industries:
+          description: |-
+            The Predicted Event Spend for each supported industry in USD.
+          type: object
+          properties:
+            accommodation:
+              description: |-
+                The consumer spend predicted to be attributed to hotels and hosts.
+              type: integer
+              examples:
+                - 5016960
+            hospitality:
+              description: |-
+                The consumer spend predicted to be attributed to food and beverage.
+              type: integer
+              examples:
+                - 4924000
+            transportation:
+              description: |-
+                The consumer spend predicted to be attributed to ground-based transportation as a means of getting to and from the event.
+              type: integer
+              examples:
+                - 1865720
+        rank:
+          description: |-
+            A log scale numerical value between 0 and 100 with a five-level hierarchical impact schema. It is designed to represent the potential impact of an event independent of its geographical location.
+          type: integer
+          minimum: 0
+          maximum: 100
+          examples:
+            - 83
+        relevance:
+          description: |-
+            Relative relevance of the event to the event search.
+
+            See the relevance parameter for information on how relevance is calculated.
+
+            This value is used purely for sorting and will be different per event depending on your request parameters.
+
+            If storing a copy of events, do not store this field.
+          type:
+            - number
+            - "null"
+          examples:
+            - 2.9654586
+        scope:
+          description: |-
+            The geographical scope the events apply to.
+          type: string
+          enum:
+            - locality
+            - localadmin
+            - county
+            - region
+            - country
+        start:
+          description: |-
+            The start date of the event in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+            All start dates are in UTC if the event time zone is provided, and in local time otherwise. For example, Independence Day falls on the 4th of July regardless of the time zone, and will have a `null` time zone.
+
+            If an event has a start time of midnight (in the event time zone) this is an indication that the actual time may be unknown. You may wish to omit the time when displaying these events.
+          type:
+            - string
+            - "null"
+          format: date-time
+        start_local:
+          description: |-
+            The local start date of the event in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+            The `start` field is in UTC and `start_local` is in the local time in the timezone at the event location.
+          type:
+            - string
+            - "null"
+          format: date-time
+        start_date_confidence_score:
+          description: |-
+            The Predicted Event start date confidence score.
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          maximum: 5
+        state:
+          description: |-
+            The publication state of the event.
+
+            Possible values:
+            - `active`: the event is published and valid.
+            - `deleted`: the event was removed, either because it was cancelled or is a duplicate.
+            - `predicted`: events that have an unconfirmed start time i.e for which the exact time the event begins is not yet known.
+          type: string
+          enum:
+            - active
+            - deleted
+            - predicted
+        timezone:
+          description: |-
+            The time zone of the event in [TZ Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format. This is helpful so you know which time zone to convert the dates to (if needed).
+
+            If the time zone is `null`, the `start` and `end` date should be regarded as time zone agnostic and already being in local time. Our `start` and `end` filters take this into account when specifying a lower and higher bound on dates.
+          type: string
+          examples:
+            - Pacific/Auckland
+        title:
+          description: |-
+            The title of the event.
+          type: string
+          examples:
+            - Katy Perry
+        updated:
+          description: |-
+            The last modification date of the event in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. All dates are in UTC.
+          type: string
+          format: date-time
+      required:
+        - category
+        - country
+        - description
+        - duration
+        - end
+        - entities
+        - first_seen
+        - id
+        - phq_labels
+        - place_hierarchies
+        - rank
+        - geo
+        - relevance
+        - start
+        - state
+        - timezone
+        - title
+        - updated
+    EventsResponse:
+      title: Events Response
+      type: object
+      description: Paginated response containing events.
+      required:
+        - count
+        - next
+        - previous
+        - overflow
+        - results
+      properties:
+        count:
+          type: integer
+          description: The total number of results.
+          minimum: 0
+        overflow:
+          type: boolean
+          description: Indicates if there are more results than the subscription allows.
+          default: false
+        previous:
+          anyOf:
+            - type: string
+            - type: 'null'
+          description: URL to the previous page of results.
+          examples:
+            - 'https://api.predicthq.com/v1/events/?limit=10&offset=10'
+        next:
+          anyOf:
+            - type: string
+            - type: 'null'
+          description: URL to the next page of results.
+          examples:
+            - 'https://api.predicthq.com/v1/events/?limit=10&offset=20'
+        results:
+          type: array
+          description: List of event records.
+          items:
+            $ref: '#/components/schemas/Event'
+    EventsCountResponse:
+      title: Events Count Response
+      type: object
+      description: The aggregated counts of events matching your filters.
+      properties:
+        count:
+          description: The total count of events matching the filters.
+          type: integer
+          minimum: 0
+        top_rank:
+          description: The PHQ Rank of the highest PHQ Ranked event.
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          maximum: 100
+        top_local_rank:
+          description: The Local Rank of the highest Local Ranked event.
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          maximum: 100
+        top_aviation_rank:
+          description: The Aviation Rank of the highest Aviation Ranked event.
+          type:
+            - integer
+            - "null"
+          deprecated: true
+          minimum: 0
+          maximum: 100
+        rank_levels:
+          description: The count of events per PHQ Rank Level.
+          $ref: '#/components/schemas/RankLevelCounts'
+        local_rank_levels:
+          description: The count of events per Local Rank Level.
+          $ref: '#/components/schemas/RankLevelCounts'
+        aviation_rank_levels:
+          description: The count of events per Aviation Rank Level.
+          $ref: '#/components/schemas/RankLevelCounts'
+          deprecated: true
+        categories:
+          description: The count of events per category.
+          type: object
+          propertyNames:
+            enum:
+              - "academic"
+              - "school-holidays"
+              - "public-holidays"
+              - "observances"
+              - "politics"
+              - "conferences"
+              - "expos"
+              - "concerts"
+              - "festivals"
+              - "performing-arts"
+              - "sports"
+              - "community"
+              - "daylight-savings"
+              - "airport-delays"
+              - "severe-weather"
+              - "disasters"
+              - "terror"
+              - "health-warnings"
+          additionalProperties:
+            type: integer
+            minimum: 1
+        labels:
+          description: The count of events broken down by label. As events can have any number of labels these counts are not expected to sum to the total count of events.
+          type: object
+          deprecated: true
+          additionalProperties:
+            type: integer
+            minimum: 1
+        phq_labels:
+          description: The count of events broken down by PHQ Label. As events can have any number of PHQ Labels these counts are not expected to sum to the total count of events.
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 1
+    EventCategory:
+      title: Event Category
+      description: Event categories.
+      type: string
+      enum:
+        - "academic"
+        - "school-holidays"
+        - "public-holidays"
+        - "observances"
+        - "politics"
+        - "conferences"
+        - "expos"
+        - "concerts"
+        - "festivals"
+        - "performing-arts"
+        - "sports"
+        - "community"
+        - "daylight-savings"
+        - "airport-delays"
+        - "severe-weather"
+        - "disasters"
+        - "terror"
+        - "health-warnings"
+    RankLevelCounts:
+      title: Rank Level Counts
+      description: The count of events broken down by rank level.
+      type: object
+      required:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+      properties:
+        "1":
+          type: integer
+          description: Minor (rank between 0 and 20).
+          minimum: 0
+        "2":
+          type: integer
+          description: Moderate (rank between 21 and 40).
+          minimum: 0
+        "3":
+          type: integer
+          description: Important (rank between 41 and 60).
+          minimum: 0
+        "4":
+          type: integer
+          description: Significant (rank between 61 and 80).
+          minimum: 0
+        "5":
+          type: integer
+          description: Major (rank between 81 and 100).
+          minimum: 0
+    LegacyLabels:
+      title: Legacy Labels
+      description: |-
+            Legacy labels to further categorise the event.
+
+            New accounts from April 2025 will not have access to the legacy labels field.
+            
+            `phq_labels` should be used instead. See [PHQ Labels](https://docs.predicthq.com/getting-started/predicthq-data/labels#phq-labels) for more information.
+      deprecated: true
+      type: array
+      items:
+        type: string
+        enum:
+          - academic
+          - academic-session
+          - agriculture
+          - air-quality
+          - airport
+          - american-football
+          - animal
+          - architecture
+          - arson
+          - ashfall
+          - assassination
+          - attack
+          - attraction
+          - australian-football
+          - auto-racing
+          - automotive
+          - autumn-holiday
+          - avalanche
+          - badminton
+          - bars-closed
+          - bars-open
+          - baseball
+          - basketball
+          - bicycle
+          - biological-hazard
+          - blizzard
+          - bombing
+          - boxing
+          - business
+          - campus
+          - career
+          - chemical
+          - chemical-accident
+          - christmas-holiday
+          - civil
+          - climate-change
+          - closed-doors
+          - clothing
+          - club
+          - coastal-event
+          - cold-wave
+          - comedy
+          - comic
+          - community
+          - concert
+          - conference
+          - construction
+          - corporate
+          - course
+          - craft
+          - cricket
+          - cyclone
+          - daylight-savings
+          - debates
+          - delay
+          - design
+          - digital
+          - disaster
+          - disaster-warning
+          - drought
+          - dust
+          - earthquake
+          - easter-holiday
+          - education
+          - election
+          - entertainment
+          - entertainment-closed
+          - entertainment-open
+          - environment
+          - environment-pollution
+          - epidemic
+          - epidemic-hazard
+          - esports
+          - estimated
+          - exam
+          - execution
+          - explosion
+          - expo
+          - extreme-weather
+          - f1
+          - family
+          - fashion
+          - festival
+          - fighting
+          - fire
+          - flood
+          - fog
+          - food
+          - football
+          - fundraiser
+          - furniture
+          - gaming
+          - golf
+          - graduation
+          - gymnastics
+          - hail
+          - hazardous-surf
+          - hazmat
+          - health
+          - health-warning
+          - heat-wave
+          - hijacking
+          - hockey
+          - holiday
+          - holiday-christian
+          - holiday-hebrew
+          - holiday-hindu
+          - holiday-local
+          - holiday-local-common
+          - holiday-muslim
+          - holiday-national
+          - holiday-observed
+          - holiday-orthodox
+          - holiday-religious
+          - horse-racing
+          - horticulture
+          - hostage-crisis
+          - household
+          - hurricane
+          - hybrid-session
+          - ice-hockey
+          - in-person-session
+          - industrial
+          - indycar
+          - instrument
+          - ironman
+          - jewelry
+          - landslide
+          - local-market
+          - lockdown
+          - lpga
+          - marathon
+          - marine
+          - mass-shooting
+          - medical
+          - mineral
+          - minor-league
+          - mlb
+          - mls
+          - mma
+          - monster-truck
+          - motocross
+          - motogp
+          - movie
+          - music
+          - nascar
+          - natural
+          - nba
+          - nba-gleague
+          - ncaa
+          - nfl
+          - nhl
+          - nuclear
+          - nursing
+          - observance
+          - observance-local
+          - observance-season
+          - observance-united-nations
+          - observance-worldwide
+          - office
+          - olympic
+          - online-session
+          - outdoor
+          - packaging
+          - paper
+          - parade
+          - parliament
+          - performing-arts
+          - personal-care-closed
+          - personal-care-open
+          - pet
+          - pga
+          - plastic
+          - politics
+          - president
+          - print
+          - product
+          - rain
+          - rallies
+          - real-estate
+          - recreation-closed
+          - recreation-open
+          - referendum
+          - religion
+          - research-development
+          - restaurant-closed
+          - restaurant-open
+          - retail-closed
+          - retail-open
+          - rodeo
+          - rugby
+          - running
+          - sales
+          - sand
+          - school
+          - science
+          - seminar
+          - shooting
+          - skating
+          - snow
+          - soccer
+          - social
+          - space
+          - sport
+          - spring-holiday
+          - stabbing
+          - storm
+          - storm-surge
+          - summer-holiday
+          - suspected-attack
+          - suspected-bombing
+          - table-tennis
+          - technology
+          - tennis
+          - terror
+          - thanksgiving-holiday
+          - thunderstorm
+          - tool
+          - tornado
+          - tourism
+          - training
+          - transportation
+          - travel
+          - triathlon
+          - tropical-storm
+          - tsunami
+          - typhoon
+          - vehicle-accident
+          - volcano
+          - volleyball
+          - weather
+          - weather-warning
+          - wedding
+          - wildfire
+          - wind
+          - winter-holiday
+          - wnba
+          - worship-closed
+          - worship-open
+          - wrestling
+          - wwe
+          - youth-sport
+      examples:
+        - - "entertainment"
+          - "family"
+    Geometry:
+      title: GeoJSON Geometry
+      oneOf:
+        - title: GeoJSON Point
+          type: object
+          required:
+            - type
+            - coordinates
+          properties:
+            type:
+              type: string
+              enum:
+                - Point
+            coordinates:
+              type: array
+              minItems: 2
+              items:
+                type: number
+              examples:
+                - - 174.776792
+                  - -36.847319
+        - title: GeoJSON MultiPoint
+          type: object
+          required:
+            - type
+            - coordinates
+          properties:
+            type:
+              type: string
+              enum:
+                - MultiPoint
+            coordinates:
+              type: array
+              items:
+                type: array
+                minItems: 2
+                items:
+                  type: number
+        - title: GeoJSON LineString
+          type: object
+          required:
+            - type
+            - coordinates
+          properties:
+            type:
+              type: string
+              enum:
+                - LineString
+            coordinates:
+              type: array
+              minItems: 2
+              items:
+                type: array
+                minItems: 2
+                items:
+                  type: number
+        - title: GeoJSON MultiLineString
+          type: object
+          required:
+            - type
+            - coordinates
+          properties:
+            type:
+              type: string
+              enum:
+                - MultiLineString
+            coordinates:
+              type: array
+              items:
+                type: array
+                minItems: 2
+                items:
+                  type: array
+                  minItems: 2
+                  items:
+                    type: number
+        - title: GeoJSON Polygon
+          type: object
+          required:
+            - type
+            - coordinates
+          properties:
+            type:
+              type: string
+              enum:
+                - Polygon
+            coordinates:
+              type: array
+              items:
+                type: array
+                minItems: 4
+                items:
+                  type: array
+                  minItems: 2
+                  items:
+                    type: number
+        - title: GeoJSON MultiPolygon
+          type: object
+          required:
+            - type
+            - coordinates
+          properties:
+            type:
+              type: string
+              enum:
+                - MultiPolygon
+            coordinates:
+              type: array
+              items:
+                type: array
+                items:
+                  type: array
+                  minItems: 4
+                  items:
+                    type: array
+                    minItems: 2
+                    items:
+                      type: number
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: "$API_KEY"

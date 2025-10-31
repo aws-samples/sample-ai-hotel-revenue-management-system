@@ -1,0 +1,49 @@
+# Competitor Pricing Analysis - July 2025
+
+## Luxury Segment Competitors
+
+### Grand Hyatt Downtown
+- Standard Room: $289-349
+- Deluxe Room: $349-429
+- Suite: $529-699
+- Current Promotions: "Stay 3, Pay 2" for weekday stays
+
+### Marriott Signature
+- Standard Room: $269-329
+- Deluxe Room: $329-399
+- Suite: $499-649
+- Current Promotions: 20% off for Marriott Bonvoy members
+
+## Upscale Segment Competitors
+
+### Hilton Garden
+- Standard Room: $199-249
+- Deluxe Room: $249-299
+- Suite: $349-429
+- Current Promotions: Breakfast included package
+
+### Courtyard by Marriott
+- Standard Room: $179-229
+- Deluxe Room: $229-279
+- Suite: $329-399
+- Current Promotions: None currently
+
+## Online Travel Agency (OTA) Analysis
+
+### Booking.com
+- Our hotel: Average rate parity compliance 87%
+- Competitors: Average rate parity compliance 92%
+- Ranking factors: Our hotel currently ranks #7 in the area
+
+### Expedia
+- Our hotel: Average rate parity compliance 91%
+- Competitors: Average rate parity compliance 89%
+- Ranking factors: Our hotel currently ranks #5 in the area
+
+## Rate Strategy Observations
+
+1. Competitors are maintaining higher rates on weekends (Fri-Sat) with average premium of 22%
+2. Suite pricing shows highest variability across competitors
+3. Marriott properties showing aggressive weekday discounting (15-25% below weekend rates)
+4. OTA prominence correlates strongly with competitive pricing (within 5% of lowest comparable property)
+5. Mobile-only discounts becoming more prevalent among competitors (5-10% exclusive discounts)

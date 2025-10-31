@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Revenue Analysis Report - Hotel Revenue Optimization{% endblock %}
+
+{% block head %}
+<style>
+.result-content div {
+    font-size: 14px;
+}
+.result-content div::first-line {
+    font-weight: bold;
+    font-size: 18px;
+    color: #2c3e50;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" data-timestamp="{{ query_result.timestamp }}">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.history') }}">History</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Revenue Analysis Report</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        Revenue Analysis Report
+                        {% if result.status == "success" %}
+                            <span class="badge bg-success">Success</span>
+                        {% elif result.status == "partial_success" %}
+                            <span class="badge bg-warning">Partial Success</span>
+                        {% elif result.status == "failure" or result.status == "error" %}
+                            <span class="badge bg-danger">Failed</span>
+                        {% endif %}
+                    </h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="printResults()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                </div>
+                <div class="card-body">
+                    <!-- Query Information -->
+                    <div class="mb-4">
+                        <h6>Analysis Details</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Analysis Date:</strong> {{ query_result.timestamp | format_datetime }}<br>
+                                <strong>Optimization Goal:</strong> 
+                                {% set summary = query_result.query_summary | lower %}
+                                {% if 'forecast' in summary or 'demand' in summary %}
+                                    Demand Forecasting
+                                {% elif 'optimize' in summary or 'revenue' in summary %}
+                                    Revenue Optimization
+                                {% elif 'pricing' in summary or 'rate' in summary %}
+                                    Pricing Strategy
+                                {% elif 'competitor' in summary or 'competition' in summary %}
+                                    Competitive Analysis
+                                {% elif 'occupancy' in summary %}
+                                    Occupancy Improvement
+                                {% elif 'revpar' in summary %}
+                                    RevPAR Enhancement
+                                {% else %}
+                                    Revenue Management
+                                {% endif %}<br>
+                            </div>
+                            <div class="col-md-6">
+                                {% if query_result.query_summary and not (query_result.query_summary | lower).startswith('query processed') %}
+                                    <strong>Analysis Scope:</strong> {{ query_result.query_summary }}<br>
+                                {% endif %}
+                                <strong>Status:</strong> 
+                                {% if query_result.result_status == 'success' %}
+                                    <span class="text-success">Analysis Complete</span>
+                                {% elif query_result.result_status == 'processing' %}
+                                    <span class="text-info">Processing...</span>
+                                {% elif query_result.result_status == 'failed' %}
+                                    <span class="text-danger">Analysis Failed</span>
+                                {% else %}
+                                    <span class="text-secondary">{{ query_result.result_status | title }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    {% if result.status == "success" or result.status == "partial_success" %}
+                        {% if markdown_content %}
+                            <div class="result-content">
+                                {{ markdown_content | safe }}
+                            </div>
+                        {% elif result.report %}
+                            <div class="result-content">
+                                <div style="white-space: pre-wrap; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">{{ result.report }}</div>
+                            </div>
+                        {% elif result.markdown_content %}
+                            <div class="result-content">
+                                <div style="white-space: pre-wrap; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">{{ result.markdown_content }}</div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <p>No detailed results available for this query.</p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-danger">
+                            <h5><i class="bi bi-exclamation-triangle"></i> Query Failed</h5>
+                            {% if error_details %}
+                                <!-- Display parsed JSON error -->
+                                {% if error_details.message %}
+                                    <p><strong>{{ error_details.message }}</strong></p>
+                                {% endif %}
+                                {% if error_details.guidance %}
+                                    <p>{{ error_details.guidance }}</p>
+                                {% endif %}
+                                {% if error_details.capabilities %}
+                                    <p><strong>I can help you with:</strong></p>
+                                    <ul>
+                                        {% for capability in error_details.capabilities %}
+                                        <li>{{ capability }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                                {% if error_details.example %}
+                                    <div class="mt-3 p-3 bg-light rounded">
+                                        <strong>Example:</strong> {{ error_details.example }}
+                                    </div>
+                                {% endif %}
+                            {% elif query_result.result_summary %}
+                                <p>{{ query_result.result_summary }}</p>
+                            {% else %}
+                                <p>An error occurred while processing this query.</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Actions -->
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="printResults()">
+                            <i class="bi bi-download"></i> Save Report
+                        </button>
+                        <button class="btn btn-success" onclick="showEmailModal()">
+                            <i class="bi bi-envelope"></i> Email Report
+                        </button>
+                        <a href="{{ url_for('main.history') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to History
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div class="modal fade" id="emailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Email Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="emailForm">
+                    <div class="mb-3">
+                        <label for="recipientEmail" class="form-label">Recipient Email</label>
+                        <input type="email" class="form-control" id="recipientEmail" required>
+                        <div class="invalid-feedback">
+                            Please enter a valid email address.
+                        </div>
+                        <div class="form-text">Report will be sent to this email with you CC'd</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="sendEmailReport()">
+                    <i class="bi bi-envelope"></i> Send Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function printResults() {
+        const resultsCard = document.querySelector('.card .badge').closest('.card');
+        if (resultsCard) {
+            const cardClone = resultsCard.cloneNode(true);
+            const cardHeader = cardClone.querySelector('.card-header');
+            if (cardHeader) {
+                cardHeader.remove();
+            }
+            
+            const currentDate = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long', 
+                day: 'numeric'
+            });
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Hotel Revenue Optimization Report</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        @media print { 
+                            body { margin: 0; } 
+                            .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 12px; color: #666; }
+                        }
+                        .no-print { display: none !important; }
+                        .footer { margin-top: 2rem; padding: 1rem; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #eee; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container-fluid p-3">
+                        ${cardClone.outerHTML.replace(/onclick="[^"]*"/g, '').replace(/class="btn[^"]*"/g, 'class="no-print"')}
+                    </div>
+                    <div class="footer">
+                        © 2025 Zenith Stays Group | ${currentDate}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    }
+
+    function showEmailModal() {
+        const modal = new bootstrap.Modal(document.getElementById('emailModal'));
+        modal.show();
+    }
+
+    function sendEmailReport() {
+        const emailInput = document.getElementById('recipientEmail');
+        const email = emailInput.value.trim();
+        
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+            emailInput.classList.add('is-invalid');
+            alert('Please enter a valid email address');
+            return;
+        }
+        
+        emailInput.classList.remove('is-invalid');
+        const timestamp = document.querySelector('[data-timestamp]').getAttribute('data-timestamp');
+        
+        // Get the send button
+        const sendBtn = document.querySelector('button[onclick="sendEmailReport()"]');
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending...';
+        
+        fetch('/send-email-report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                email: email,
+                timestamp: timestamp
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Report sent successfully!');
+                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('emailModal'));
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+                emailInput.value = '';
+                emailInput.classList.remove('is-invalid');
+            } else {
+                alert('Failed to send report: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error sending report: ' + error.message);
+        })
+        .finally(() => {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="bi bi-envelope"></i> Send Report';
+        });
+    }
+</script>
+{% endblock %}

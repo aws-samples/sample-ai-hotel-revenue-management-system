@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Help{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Help & Documentation</h1>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Getting Started</h5>
+                </div>
+                <div class="card-body">
+                    <h5>Welcome to the Hotel Revenue Optimization System</h5>
+                    <p>This system helps you optimize your hotel's revenue by providing data-driven recommendations based on market analysis, demand forecasting, and pricing strategies.</p>
+                    
+                    <h5 class="mt-4">Two Ways to Use the System</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="card-title mb-0">Natural Language</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Ask questions or request recommendations in plain English. For example:</p>
+                                    <ul>
+                                        <li>"Optimize pricing for my 4-star hotel in Miami during summer"</li>
+                                        <li>"Forecast demand for next quarter for my business hotel"</li>
+                                        <li>"Analyze competitor pricing for luxury hotels in my area"</li>
+                                    </ul>
+                                    <a href="{{ url_for('main.natural_language') }}" class="btn btn-primary">Try Natural Language</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="card-title mb-0">Structured Form</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Fill out a form with specific details about your hotel and requirements:</p>
+                                    <ul>
+                                        <li>Hotel type, location, and star rating</li>
+                                        <li>Season and current occupancy rate</li>
+                                        <li>Optimization goals and competitor analysis</li>
+                                    </ul>
+                                    <a href="{{ url_for('main.structured_form') }}" class="btn btn-success">Try Structured Form</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Tips for Best Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>For Natural Language Queries</h5>
+                            <ul>
+                                <li>Be specific about your hotel type, location, and time period</li>
+                                <li>Mention your current challenges or goals</li>
+                                <li>Include current occupancy rates or pricing if available</li>
+                                <li>Specify if you want competitor analysis</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>For Structured Form</h5>
+                            <ul>
+                                <li>Fill out all fields for the most accurate recommendations</li>
+                                <li>Be specific with your location (city, neighborhood)</li>
+                                <li>Select the most appropriate optimization goal</li>
+                                <li>Check the competitor analysis box for market positioning</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Understanding Results</h5>
+                </div>
+                <div class="card-body">
+                    <p>The system provides comprehensive recommendations that typically include:</p>
+                    <ul>
+                        <li><strong>Executive Summary</strong> - A high-level overview of the recommendations</li>
+                        <li><strong>Market Analysis</strong> - Insights into current market conditions</li>
+                        <li><strong>Pricing Recommendations</strong> - Specific pricing strategies for different room types and periods</li>
+                        <li><strong>Distribution Strategy</strong> - Recommendations for channel management</li>
+                        <li><strong>Implementation Plan</strong> - Step-by-step guide to implement the recommendations</li>
+                        <li><strong>Expected Outcomes</strong> - Projected results from implementing the recommendations</li>
+                    </ul>
+                    
+                    <div class="alert alert-info mt-3">
+                        <h5><i class="bi bi-info-circle"></i> Viewing History</h5>
+                        <p>All your queries and their results are saved in the <a href="{{ url_for('main.history') }}">History</a> page for future reference.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Need More Help?</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-3">
+                        <h5><i class="bi bi-info-circle"></i> Support Information</h5>
+                        <p class="mb-0">Contact our support team for assistance with the application.</p>
+                    </div>
+                    
+                    <p>If you have any questions or need assistance, please contact our support team:</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-envelope"></i> 
+                            <strong>Email:</strong> 
+                            <span class="text-muted">support@hotelrevenue.com</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-telephone"></i> 
+                            <strong>Phone:</strong> 
+                            <span class="text-muted">(555) 123-4567</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-clock"></i> 
+                            <strong>Hours:</strong> 
+                            <span class="text-muted">Monday-Friday, 9am-5pm EST</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="alert alert-info mt-3">
+                        <h5><i class="bi bi-info-circle"></i> For Real Implementation</h5>
+                        <p class="mb-0">This application showcases AWS services including Amazon Bedrock, ECS, CloudFront, and Cognito. For questions about AWS services, please contact your AWS representative or visit the AWS documentation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

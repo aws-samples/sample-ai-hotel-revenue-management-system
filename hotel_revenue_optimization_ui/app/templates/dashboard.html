@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Dashboard</h1>
+    
+    <div class="alert alert-info mb-4">
+        <h5><i class="bi bi-info-circle"></i> Revenue Optimization Dashboard</h5>
+        <p class="mb-0">AI-powered hotel revenue optimization and analysis platform.</p>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('main.natural_language') }}" class="btn btn-primary">
+                            <i class="bi bi-chat-text"></i> Natural Language Query
+                        </a>
+                        <a href="{{ url_for('main.structured_form') }}" class="btn btn-success">
+                            <i class="bi bi-ui-checks"></i> Structured Form Query
+                        </a>
+                        <a href="{{ url_for('main.history') }}" class="btn btn-info">
+                            <i class="bi bi-clock-history"></i> View Query History
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Sample Queries</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Try these example queries to get started:</p>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <a href="{{ url_for('main.natural_language', query='Forecast demand for Metropolitan Business Hotel in Chicago, IL 60601 with current 65% occupancy and $220 ADR. Plan for next 3 months considering McCormick Place convention schedule, Chicago Marathon in October, and holiday business travel patterns. Target 75% occupancy by December.') }}">
+                                Forecast demand for Metropolitan Business Hotel in Chicago, IL 60601 with seasonal events planning
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="{{ url_for('main.natural_language', query='Optimize revenue for The Grand Oceanview Resort in Miami Beach, FL 33139. 5-star luxury oceanfront property with 200 suites, premium ocean-view rooms, and standard accommodations. Current metrics: 78% occupancy, $485 ADR, $378 RevPAR. Target $420 RevPAR for Q1 2025. Competing with Fontainebleau, St. Regis, and new luxury developments. Address Art Basel Miami Beach impact and winter season pricing.') }}">
+                                Optimize revenue for The Grand Oceanview Resort in Miami Beach, FL 33139 with competitive analysis
+                            </a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="{{ url_for('main.natural_language', query='Create year-round revenue strategy for Sunset Mountain Resort in Aspen, CO 81611. 4.5-star ski resort with 150 rooms: standard mountain rooms, deluxe slope-view suites, and luxury chalets. Winter season: 85% occupancy, $650 ADR. Summer challenge: 45% occupancy, $280 ADR. Plan for Aspen Music Festival, hiking season, and shoulder periods. Target consistent $400 RevPAR year-round.') }}">
+                                Create year-round revenue strategy for Sunset Mountain Resort in Aspen, CO 81611
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">How to Use This System</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="bi bi-chat-text"></i> Natural Language Interface</h5>
+                            <p>Ask questions or request recommendations in plain English:</p>
+                            <ol>
+                                <li>Navigate to the <a href="{{ url_for('main.natural_language') }}">Natural Language page</a></li>
+                                <li>Type your query in the text box</li>
+                                <li>Click "Submit Query"</li>
+                                <li>View the AI-generated recommendations</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="bi bi-ui-checks"></i> Structured Form Interface</h5>
+                            <p>For more precise control, use the structured form:</p>
+                            <ol>
+                                <li>Navigate to the <a href="{{ url_for('main.structured_form') }}">Structured Form page</a></li>
+                                <li>Fill out the form with your specific requirements</li>
+                                <li>Click "Generate Recommendations"</li>
+                                <li>View the AI-generated recommendations</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

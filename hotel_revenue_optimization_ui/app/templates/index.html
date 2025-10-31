@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Home{% endblock %}
+
+{% block content %}
+<div class="alert alert-info alert-dismissible fade show mx-4 mt-3" role="alert">
+    <h5><i class="bi bi-info-circle"></i> Welcome</h5>
+    <p class="mb-0">AI-powered hotel revenue optimization using AWS AI Services by Oak City Legion Group</p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">Hotel Revenue Optimization</h1>
+    <div class="col-lg-8 mx-auto">
+        <p class="lead mb-4">
+            Maximize your hotel's revenue with AI-powered pricing strategies and demand forecasting.
+            Our system analyzes market trends, competitor pricing, and historical data to provide
+            actionable recommendations for optimizing your hotel's revenue.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            {% if 'user' in session %}
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg px-4 gap-3">Go to Dashboard</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 gap-3">Get Started</a>
+            {% endif %}
+            <a href="{{ url_for('main.help') }}" class="btn btn-outline-secondary btn-lg px-4">Learn More</a>
+        </div>
+    </div>
+</div>
+
+<div class="container px-4 py-5" id="featured-3">
+    <h2 class="pb-2 border-bottom">Key Features</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="feature col">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3 p-3 rounded">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <h3 class="fs-2 text-body-emphasis">Dynamic Pricing</h3>
+            <p>Optimize room rates based on demand forecasts, competitor pricing, and market trends to maximize revenue.</p>
+        </div>
+        <div class="feature col">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3 p-3 rounded">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <h3 class="fs-2 text-body-emphasis">Demand Forecasting</h3>
+            <p>Predict future demand patterns using historical data, seasonal trends, and upcoming events.</p>
+        </div>
+        <div class="feature col">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3 p-3 rounded">
+                <i class="bi bi-people"></i>
+            </div>
+            <h3 class="fs-2 text-body-emphasis">Competitor Analysis</h3>
+            <p>Monitor and analyze competitor pricing strategies to stay competitive in your market.</p>
+        </div>
+    </div>
+</div>
+
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom">How It Works</h2>
+    <div class="row g-4 py-5">
+        <div class="col-md-6">
+            <h3>Natural Language Interface</h3>
+            <p>
+                Simply ask questions or request recommendations in plain English. Our AI system will understand your query
+                and provide detailed, actionable insights tailored to your specific needs.
+            </p>
+            <p>Example queries:</p>
+            <ul>
+                <li>"Optimize pricing for my 4-star hotel in Miami during summer season"</li>
+                <li>"Forecast demand for my business hotel in New York for next quarter"</li>
+                <li>"Analyze competitor pricing for luxury hotels in San Francisco"</li>
+            </ul>
+            {% if 'user' in session %}
+            <a href="{{ url_for('main.natural_language') }}" class="btn btn-primary">Try Natural Language Interface</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login to Try</a>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h3>Structured Form Interface</h3>
+            <p>
+                For more precise control, use our structured form interface to specify exactly what information you need.
+                Select from dropdown menus and input fields to generate highly targeted recommendations.
+            </p>
+            <p>Form options include:</p>
+            <ul>
+                <li>Hotel type (luxury, business, resort, etc.)</li>
+                <li>Location and seasonality</li>
+                <li>Current occupancy rates</li>
+                <li>Optimization goals (maximize revenue, occupancy, or profit)</li>
+            </ul>
+            {% if 'user' in session %}
+            <a href="{{ url_for('main.structured_form') }}" class="btn btn-primary">Try Structured Form Interface</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login to Try</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

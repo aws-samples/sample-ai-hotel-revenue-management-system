@@ -1,0 +1,16 @@
+[
+  {
+    "name": "search_hotel_best_practices",
+    "description": "Search hotel revenue management best practices and optimization strategies",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query for hotel revenue best practices (e.g., 'ADR optimization', 'revenue management', 'pricing strategy', 'occupancy optimization')"
+        }
+      },
+      "required": ["query"]
+    }
+  }
+]

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Processing Login{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Processing Login</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Please wait while we process your login...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parse the URL fragment
+        function parseHash() {
+            const hash = window.location.hash.substring(1);
+            const params = {};
+            hash.split('&').forEach(function(pair) {
+                const parts = pair.split('=');
+                params[parts[0]] = decodeURIComponent(parts[1]);
+            });
+            return params;
+        }
+        
+        // Process the tokens
+        const params = parseHash();
+        
+        if (params.id_token) {
+            // Calculate expiration time
+            const expiresIn = parseInt(params.expires_in || '3600');
+            const expiresAt = Math.floor(Date.now() / 1000) + expiresIn;
+            
+            // Send the tokens to the server
+            fetch('{{ url_for("auth.process_token") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    id_token: params.id_token,
+                    access_token: params.access_token,
+                    expires_at: expiresAt,
+                    token_type: params.token_type
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    console.error('Error processing token:', data.error);
+                    window.location.href = '{{ url_for("auth.login") }}';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                window.location.href = '{{ url_for("auth.login") }}';
+            });
+        } else {
+            console.error('No ID token found in URL');
+            window.location.href = '{{ url_for("auth.login") }}';
+        }
+    });
+</script>
+{% endblock %}

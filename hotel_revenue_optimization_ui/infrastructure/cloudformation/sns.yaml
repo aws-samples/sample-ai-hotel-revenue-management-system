@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'SNS topic for email reports'
+
+Parameters:
+  AppName:
+    Type: String
+    Default: hotel-revenue-optimization
+    Description: Name of the application
+  
+  Environment:
+    Type: String
+    Default: dev
+    Description: Environment name (dev, test, prod)
+    AllowedValues:
+      - dev
+      - test
+      - prod
+
+Resources:
+  EmailReportTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${AppName}-${Environment}-email-reports
+      DisplayName: Hotel Revenue Optimization Email Reports
+      Tags:
+        - Key: Name
+          Value: !Sub ${AppName}-${Environment}-email-reports
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  EmailReportTopicArn:
+    Description: ARN of the SNS topic for email reports
+    Value: !Ref EmailReportTopic
+    Export:
+      Name: !Sub ${AppName}-${Environment}-EmailReportTopicArn

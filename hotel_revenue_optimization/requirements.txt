@@ -1,0 +1,13 @@
+crewai>=0.148.0,<1.0.0
+bedrock-agentcore
+boto3>=1.34.0
+
+# Development dependencies
+bedrock-agentcore-starter-toolkit==0.1.0
+
+# OpenTelemetry dependencies - only what we need
+aws_opentelemetry_distro_genai_beta>=0.1.2
+
+# Prometheus metrics
+prometheus-client==0.20.0
+psutil==5.9.8

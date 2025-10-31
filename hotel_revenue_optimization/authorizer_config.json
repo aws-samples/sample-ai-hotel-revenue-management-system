@@ -1,0 +1,8 @@
+{
+  "type": "COGNITO_USER_POOLS",
+  "authorizerUri": "",
+  "authorizerCredentials": "",
+  "authorizerResultTtlInSeconds": 300,
+  "identitySource": "method.request.header.Authorization",
+  "providerARNs": ["arn:aws:cognito-idp:us-east-1:943562114123:userpool/us-east-1_580kVSl4l"]
+}

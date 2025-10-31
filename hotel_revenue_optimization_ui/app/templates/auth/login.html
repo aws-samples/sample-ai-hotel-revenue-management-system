@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Login{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Login</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Please log in to access the Hotel Revenue Optimization System.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ login_url }}" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Login with Cognito
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

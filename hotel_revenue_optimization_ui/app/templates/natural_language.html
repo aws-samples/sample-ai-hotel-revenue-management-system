@@ -1,0 +1,551 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Natural Language Query{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Natural Language Query</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Ask a Question</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('main.natural_language') }}" id="queryForm">
+                        {{ form.csrf_token }}
+                        <div class="mb-3">
+                            {{ form.query.label(class="form-label") }}
+                            {{ form.query(class="form-control") }}
+                            {% if form.query.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.query.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <i class="bi bi-send"></i> Submit Query
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#sampleQueries">
+                                <i class="bi bi-lightbulb"></i> Show Sample Queries
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Results Section -->
+                    <div id="resultsSection" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Results</h5>
+                            </div>
+                            <div class="card-body" id="resultsContent">
+                                <!-- Loading spinner will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Spinner -->
+                    <div class="loading-container mt-4 d-none" id="loadingSpinner">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border text-primary me-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Processing your query...</h5>
+                                <p class="mb-2">Research may take up to 60 seconds to complete.</p>
+                                <div class="d-flex">
+                                    <button class="btn btn-sm btn-outline-secondary me-2" id="acknowledgeBtn">
+                                        <i class="bi bi-check-circle"></i> Acknowledge
+                                    </button>
+                                    <a href="{{ url_for('main.history') }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-clock-history"></i> Check History Later
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="collapse mt-3" id="sampleQueries">
+                        <div class="card card-body bg-light">
+                            <h6>Sample Queries:</h6>
+                            <div class="mb-2">
+                                <small class="text-muted">These are sample queries showcasing different property types, challenges, and system capabilities.</small>
+                            </div>
+                            <ul class="list-group">
+                                {% for query in sample_queries %}
+                                <li class="list-group-item">
+                                    <a href="#" class="sample-query">{{ query }}</a>
+                                    {% if loop.index == 1 %}
+                                    <span class="badge bg-primary ms-2">Quick Business Analysis</span>
+                                    {% elif loop.index == 2 %}
+                                    <span class="badge bg-info ms-2">Luxury Resort</span>
+                                    {% elif loop.index == 3 %}
+                                    <span class="badge bg-success ms-2">Seasonal Complexity</span>
+                                    {% elif loop.index == 4 %}
+                                    <span class="badge bg-warning ms-2">Boutique Hotel</span>
+                                    {% elif loop.index == 5 %}
+                                    <span class="badge bg-secondary ms-2">Budget Property</span>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="mt-3">
+                                <div class="alert alert-info">
+                                    <small><i class="bi bi-info-circle"></i> <strong>Suggested Flow:</strong> Start with the quick business hotel analysis, then show the comprehensive luxury resort analysis, followed by seasonal complexity with the ski resort, and end with segment versatility examples.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if result %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        Results 
+                        {% if result.status == "success" %}
+                            <span class="badge bg-success">Success</span>
+                        {% elif result.status == "partial_success" %}
+                            <span class="badge bg-warning">Partial Success</span>
+                        {% elif result.status == "failure" or result.status == "error" %}
+                            <span class="badge bg-danger">Failed</span>
+                        {% endif %}
+                    </h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="printResults()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if result.status == "partial_success" %}
+                    <div class="alert alert-warning">
+                        <h5><i class="bi bi-exclamation-triangle"></i> Partial Results</h5>
+                        <p>Some tasks could not be completed. The report below contains partial results.</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Completed Tasks:</h6>
+                                <ul>
+                                    {% for task in result.completed_tasks %}
+                                    <li>{{ task|replace('_', ' ')|title }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Failed Tasks:</h6>
+                                <ul>
+                                    {% for task in result.failed_tasks %}
+                                    <li>{{ task|replace('_', ' ')|title }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif result.status == "failure" or result.status == "error" %}
+                    <div class="alert alert-danger">
+                        <h5><i class="bi bi-x-circle"></i> Request Failed</h5>
+                        
+                        {% if result.message %}
+                            <p><strong>{{ result.message }}</strong></p>
+                        {% elif result.summary %}
+                            <p><strong>{{ result.summary }}</strong></p>
+                        {% else %}
+                            <p>We encountered an issue while processing your request.</p>
+                        {% endif %}
+                        
+                        <!-- Handle irrelevant query error type -->
+                        {% if result.error_type == "irrelevant_query" %}
+                            {% if result.guidance %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-lightbulb"></i> {{ result.guidance }}</h6>
+                                    {% if result.capabilities %}
+                                        <ul class="mb-2">
+                                            {% for capability in result.capabilities %}
+                                            <li>{{ capability }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.example %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-chat-quote"></i> Example Query:</h6>
+                                    <div class="bg-light p-3 rounded mb-2">
+                                        <code>{{ result.example }}</code>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary use-example-btn" data-example="{{ result.example }}">
+                                        <i class="bi bi-lightning"></i> Use This Example
+                                    </button>
+                                </div>
+                            {% endif %}
+                        
+                        <!-- Handle insufficient information error type -->
+                        {% elif result.error_type == "insufficient_information" %}
+                            {% if result.missing_critical_info %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-exclamation-triangle"></i> Missing Critical Information:</h6>
+                                    <ul class="mb-2">
+                                        {% for info in result.missing_critical_info %}
+                                        <li><strong>{{ info|title }}</strong></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.guidance and result.required_info %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-lightbulb"></i> {{ result.guidance }}</h6>
+                                    <ul class="mb-2">
+                                        {% for info in result.required_info %}
+                                        <li>{{ info }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.examples %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-chat-quote"></i> Example Queries:</h6>
+                                    {% for example in result.examples %}
+                                    <div class="bg-light p-2 rounded mb-2">
+                                        <code>{{ example }}</code>
+                                        <button class="btn btn-sm btn-outline-primary use-example-btn ms-2" data-example="{{ example }}">
+                                            <i class="bi bi-lightning"></i> Use This
+                                        </button>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        
+                        <!-- Fallback for legacy error format -->
+                        {% else %}
+                            {% if result.missing_fields %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-info-circle"></i> Missing Information:</h6>
+                                    <ul class="mb-2">
+                                        {% for field in result.missing_fields %}
+                                        <li>{{ field|replace('_', ' ')|title }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.guidance %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-lightbulb"></i> Guidance:</h6>
+                                    <p class="mb-2">{{ result.guidance }}</p>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.example %}
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-chat-quote"></i> Example Query:</h6>
+                                    <div class="bg-light p-3 rounded mb-2">
+                                        <code>{{ result.example }}</code>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary use-example-btn" data-example="{{ result.example }}">
+                                        <i class="bi bi-lightning"></i> Use This Example
+                                    </button>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> 
+                                I'm specialized in hotel revenue optimization. Please provide specific hotel details for the best recommendations.
+                            </small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if markdown_content %}
+                    <div class="markdown-content">
+                        {{ markdown_content|safe }}
+                    </div>
+                    {% elif result.status == "success" or result.status == "partial_success" %}
+                    <div class="alert alert-info">
+                        No detailed content available. Please check the raw result below.
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Debug section for raw JSON responses (only show for errors or when no markdown content) -->
+                    {% if (result.status == "error" or result.status == "failure") and not result.message and not result.missing_fields %}
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#rawResponse">
+                            <i class="bi bi-code"></i> Show Raw Response
+                        </button>
+                        <div class="collapse mt-2" id="rawResponse">
+                            <div class="card card-body bg-light">
+                                <pre><code>{{ result|tojson(indent=2) }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if result.status == "success" or result.status == "partial_success" %}
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="printResults()">
+                            <i class="bi bi-download"></i> Save Report
+                        </button>
+                        <a href="{{ url_for('main.history') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-clock-history"></i> View History
+                        </a>
+                        
+                        <!-- Show metadata if available -->
+                        {% if result.metadata %}
+                        <button class="btn btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#metadata">
+                            <i class="bi bi-info-circle"></i> Analysis Details
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Metadata section -->
+                    {% if result.metadata %}
+                    <div class="collapse mt-3" id="metadata">
+                        <div class="card card-body bg-light">
+                            <h6><i class="bi bi-speedometer2"></i> Analysis Performance</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {% if result.metadata.duration_seconds %}
+                                    <p><strong>Duration:</strong> {{ "%.1f"|format(result.metadata.duration_seconds) }} seconds</p>
+                                    {% endif %}
+                                    {% if result.metadata.run_id %}
+                                    <p><strong>Run ID:</strong> <code>{{ result.metadata.run_id }}</code></p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if result.metadata.start_time %}
+                                    <p><strong>Started:</strong> {{ result.metadata.start_time }}</p>
+                                    {% endif %}
+                                    {% if result.metadata.end_time %}
+                                    <p><strong>Completed:</strong> {{ result.metadata.end_time }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if result.completed_tasks %}
+                            <h6 class="mt-3"><i class="bi bi-check-circle text-success"></i> Completed Tasks</h6>
+                            <ul class="list-unstyled">
+                                {% for task in result.completed_tasks %}
+                                <li><i class="bi bi-check text-success"></i> {{ task|replace('_', ' ')|title }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            
+                            {% if result.failed_tasks %}
+                            <h6 class="mt-3"><i class="bi bi-x-circle text-danger"></i> Failed Tasks</h6>
+                            <ul class="list-unstyled">
+                                {% for task in result.failed_tasks %}
+                                <li><i class="bi bi-x text-danger"></i> {{ task|replace('_', ' ')|title }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let pollingInterval = null;
+let currentTimestamp = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle sample query clicks
+    document.querySelectorAll('.sample-query').forEach(function(element) {
+        element.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('query').value = this.textContent.trim();
+            document.getElementById('sampleQueries').classList.remove('show');
+        });
+    });
+    
+    // Handle "Use This Example" button clicks
+    document.querySelectorAll('.use-example-btn').forEach(function(element) {
+        element.addEventListener('click', function(e) {
+            e.preventDefault();
+            const example = this.getAttribute('data-example');
+            if (example) {
+                document.getElementById('query').value = example;
+                document.getElementById('query').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+
+    // Handle form submission with polling
+    document.getElementById('queryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const submitBtn = document.getElementById('submitBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContent = document.getElementById('resultsContent');
+        
+        // Disable submit button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+        
+        // Show results section with loading spinner
+        resultsSection.style.display = 'block';
+        resultsContent.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-3">
+                    <h5>Processing your query...</h5>
+                    <p class="text-muted">This may take a few moments. You can wait here or check back later in your history.</p>
+                    <button type="button" class="btn btn-outline-secondary" onclick="acknowledgeProcessing()">
+                        <i class="bi bi-check"></i> I'll check later
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Submit form
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'processing') {
+                currentTimestamp = data.timestamp;
+                startPolling(data.timestamp);
+            } else {
+                showError('Failed to submit query');
+            }
+        })
+        .catch(error => {
+            showError('Error submitting query: ' + error.message);
+        });
+    });
+});
+
+function startPolling(timestamp) {
+    pollingInterval = setInterval(() => {
+        fetch(`/check-query-status/${timestamp}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                stopPolling();
+                showResults(timestamp);
+            } else if (data.status === 'failed') {
+                stopPolling();
+                showError('Query processing failed: ' + data.summary);
+            }
+        })
+        .catch(error => {
+            console.error('Polling error:', error);
+        });
+    }, 3000);
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="bi bi-send"></i> Submit Query';
+}
+
+function acknowledgeProcessing() {
+    stopPolling();
+    
+    const resultsContent = document.getElementById('resultsContent');
+    resultsContent.innerHTML = `
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle"></i>
+            <strong>Query submitted successfully!</strong> 
+            Your analysis is being processed in the background. 
+            <a href="/history" class="alert-link">Check your history</a> to see the results when ready.
+        </div>
+    `;
+}
+
+function showResults(timestamp) {
+    window.location.href = `/history/${timestamp}`;
+}
+
+function showError(message) {
+    stopPolling();
+    
+    const resultsContent = document.getElementById('resultsContent');
+    resultsContent.innerHTML = `
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Error:</strong> ${message}
+        </div>
+    `;
+}
+
+function printResults() {
+    const resultsCard = document.querySelector('.card:has(.badge)');
+    if (resultsCard) {
+        const cardClone = resultsCard.cloneNode(true);
+        const cardHeader = cardClone.querySelector('.card-header');
+        if (cardHeader) {
+            cardHeader.remove();
+        }
+        
+        const currentDate = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long', 
+            day: 'numeric'
+        });
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Hotel Revenue Optimization Report</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                <style>
+                    @media print { 
+                        body { margin: 0; } 
+                        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 12px; color: #666; }
+                    }
+                    .no-print { display: none !important; }
+                    .footer { margin-top: 2rem; padding: 1rem; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #eee; }
+                </style>
+            </head>
+            <body>
+                <div class="container-fluid p-3">
+                    ${cardClone.outerHTML.replace(/onclick="[^"]*"/g, '').replace(/class="btn[^"]*"/g, 'class="no-print"')}
+                </div>
+                <div class="footer">
+                    © 2025 Zenith Stays Group | ${currentDate}
+                </div>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    }
+}
+</script>
+{% endblock %}

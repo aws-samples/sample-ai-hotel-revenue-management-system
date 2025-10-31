@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - User Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">User Profile</h1>
+    
+    <div class="alert alert-warning mb-4">
+        <h5><i class="bi bi-person-circle"></i> User Profile</h5>
+        <p class="mb-0">Manage your account settings and preferences.</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" value="{{ session.get('user', {}).get('name', 'User') }}" readonly>
+                        <small class="text-muted">Your display name</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" value="{{ session.get('user', {}).get('email', 'user@example.com') }}" readonly>
+                        <small class="text-muted">Your email address</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">User ID</label>
+                        <input type="text" class="form-control" value="{{ session.get('user', {}).get('sub', 'user-12345') }}" readonly>
+                        <small class="text-muted">Your unique user identifier</small>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Account Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <p class="mb-0">
+                            <i class="bi bi-info-circle"></i> 
+                            Account management is handled through Amazon Cognito User Pools.
+                        </p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6>Available Features:</h6>
+                    <ul class="small">
+                        <li>User authentication via Amazon Cognito</li>
+                        <li>Session management</li>
+                        <li>Profile data display</li>
+                        <li>Secure logout functionality</li>
+                    </ul>
+                    
+                    <p class="small text-muted">For any questions about implementing this solution, please contact your AWS representative.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

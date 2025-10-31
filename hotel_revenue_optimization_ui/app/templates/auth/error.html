@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Revenue Optimization - Authentication Error{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">Authentication Error</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3">An error occurred during authentication</h4>
+                        <p class="mt-3">{{ error }}</p>
+                        {% if error_description %}
+                        <p class="text-muted">{{ error_description }}</p>
+                        {% endif %}
+                        <div class="mt-4">
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Try Again</a>
+                            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary ms-2">Return to Home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

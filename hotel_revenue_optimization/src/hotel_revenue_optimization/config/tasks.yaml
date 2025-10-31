@@ -1,0 +1,219 @@
+market_analysis_task:
+  description: >
+    Analyze the current market conditions, competitor pricing, and external factors affecting demand.
+    Consider the hotel's location, star rating, and target segments.
+    Identify key market trends and competitive positioning opportunities.
+    
+    Hotel details:
+    - Name: {hotel_name}
+    - Location: {hotel_location}
+    - Star Rating: {hotel_rating}
+    - Room Types: {room_types}
+    
+    Time period for analysis: {analysis_period}
+    
+    {formatting_instruction}
+  expected_output: >
+    A comprehensive market analysis report formatted in markdown with proper headers, bullet points, and tables including:
+    
+    # Market Analysis Report
+    
+    ## Executive Summary
+    - Key findings and recommendations
+    
+    ## Current Market Conditions
+    - Market overview with bullet points
+    
+    ## Competitor Pricing Analysis
+    - Competitor comparison table
+    - Channel analysis
+    
+    ## Market Trends
+    - Key trends affecting the market
+    
+    ## External Factors
+    - Events, seasonality, and other factors
+    
+    ## Competitive Positioning Recommendations
+    - Actionable recommendations with bullet points
+  agent: market_analyst
+
+demand_forecast_task:
+  description: >
+    Forecast demand for the hotel over the specified time period.
+    Break down forecasts by room type, market segment, and booking channel.
+    Consider historical booking patterns, current pace, and market analysis.
+    
+    Hotel details:
+    - Name: {hotel_name}
+    - Location: {hotel_location}
+    - Historical Occupancy: {historical_occupancy}
+    - Room Types: {room_types}
+    
+    Time period for forecast: {forecast_period}
+    
+    {formatting_instruction}
+  expected_output: >
+    A detailed demand forecast formatted in markdown with proper headers, tables, and structured sections including:
+    
+    # Demand Forecast Report
+    
+    ## Executive Summary
+    - Key forecast highlights
+    
+    ## Overall Occupancy Projections
+    | Period | Occupancy % | Confidence Level |
+    |--------|-------------|------------------|
+    | Week 1 | XX% | High/Medium/Low |
+    
+    ## Segment-Level Demand Forecasts
+    - Business travelers
+    - Leisure travelers
+    - Group bookings
+    
+    ## Channel-Level Booking Projections
+    - Direct bookings
+    - OTA channels
+    - Corporate channels
+    
+    ## High and Low Demand Periods
+    - Peak periods with dates
+    - Low demand periods with dates
+    
+    ## Forecast Confidence and Risk Factors
+    - Confidence levels explanation
+    - Risk factors that could impact forecasts
+  agent: demand_forecaster
+
+pricing_strategy_task:
+  description: >
+    Develop optimal pricing strategies based on the market analysis and demand forecast.
+    Consider rate parity, channel distribution, and segment-specific pricing.
+    Identify opportunities for dynamic pricing, upselling, and promotions.
+    
+    Hotel details:
+    - Name: {hotel_name}
+    - Current ADR: {current_adr}
+    - Target RevPAR: {target_revpar}
+    - Room Types: {room_types}
+    
+    Use the market analysis and demand forecast provided.
+    
+    {formatting_instruction}
+  expected_output: >
+    A comprehensive pricing strategy formatted in markdown with clear sections, tables, and actionable recommendations including:
+    
+    # Pricing Strategy Report
+    
+    ## Executive Summary
+    - Key pricing recommendations
+    - Expected revenue impact
+    
+    ## Base Rate Recommendations
+    | Room Type | Current Rate | Recommended Rate | % Change |
+    |-----------|--------------|------------------|----------|
+    | Standard  | $XXX | $XXX | +X% |
+    
+    ## Dynamic Pricing Rules
+    ### High Demand Periods
+    - Pricing adjustments and triggers
+    
+    ### Low Demand Periods
+    - Promotional pricing strategies
+    
+    ## Channel-Specific Pricing Strategies
+    - **Direct Bookings**: Rate and incentive strategies
+    - **OTA Channels**: Rate parity and positioning
+    - **Corporate Channels**: Volume discount structures
+    
+    ## Segment-Specific Recommendations
+    - Business travelers pricing
+    - Leisure travelers pricing
+    - Group booking strategies
+    
+    ## Promotional and Package Recommendations
+    - Seasonal promotions
+    - Package deals and bundles
+    
+    ## Upselling and Cross-Selling Opportunities
+    - Room upgrade strategies
+    - Ancillary revenue opportunities
+  agent: pricing_strategist
+
+revenue_management_task:
+  description: >
+    Review the market analysis, demand forecast, and pricing strategy.
+    Develop an implementation plan with specific actions and timelines.
+    Create performance tracking metrics and KPIs.
+    Provide an executive summary with revenue projections.
+    
+    Hotel details:
+    - Name: {hotel_name}
+    - Current RevPAR: {current_revpar}
+    - Target RevPAR: {target_revpar}
+    - Current Challenges: {current_challenges}
+    
+    Use all previous analyses and recommendations.
+    
+    {formatting_instruction}
+  expected_output: >
+    A comprehensive revenue management plan formatted in professional markdown with clear structure, tables, and actionable items including:
+    
+    # Hotel Revenue Optimization Plan
+    
+    ## Executive Summary
+    - **Hotel**: {hotel_name}
+    - **Current Performance**: Key metrics summary
+    - **Revenue Opportunity**: Projected improvements
+    - **Key Recommendations**: Top 3-5 priority actions
+    
+    ## Current Performance Analysis
+    | Metric | Current | Target | Gap |
+    |--------|---------|--------|-----|
+    | RevPAR | $XXX | $XXX | $XXX |
+    | ADR | $XXX | $XXX | $XXX |
+    | Occupancy | XX% | XX% | XX% |
+    
+    ## Implementation Timeline
+    ### Phase 1: Immediate Actions (0-30 days)
+    - [ ] Action item 1
+    - [ ] Action item 2
+    
+    ### Phase 2: Short-term Initiatives (30-90 days)
+    - [ ] Action item 1
+    - [ ] Action item 2
+    
+    ### Phase 3: Long-term Strategy (90+ days)
+    - [ ] Action item 1
+    - [ ] Action item 2
+    
+    ## Performance Tracking Metrics and KPIs
+    ### Primary KPIs
+    - RevPAR tracking and targets
+    - ADR optimization metrics
+    - Occupancy rate improvements
+    
+    ### Secondary KPIs
+    - Channel performance metrics
+    - Segment mix optimization
+    - Competitive positioning
+    
+    ## Revenue Projections and Financial Impact
+    | Period | Projected RevPAR | Revenue Impact | Confidence |
+    |--------|------------------|----------------|------------|
+    | Month 1 | $XXX | +$XXX | High |
+    
+    ## Risk Assessment and Mitigation Strategies
+    ### High Risk Factors
+    - Risk 1: Description and mitigation
+    - Risk 2: Description and mitigation
+    
+    ### Medium Risk Factors
+    - Risk 1: Description and mitigation
+    
+    ## Conclusion and Next Steps
+    - Summary of expected outcomes
+    - Key success factors
+    - Recommended review schedule
+  agent: revenue_manager
+  output_file: 'output/revenue_optimization_plan.md'
