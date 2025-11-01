@@ -17,10 +17,53 @@ This system combines advanced AI agents with real-time market analysis to provid
 
 ## Components
 
-- **`hotel_revenue_optimization/`** - Core AI agent system with CrewAI framework
-- **`hotel_revenue_optimization_ui/`** - Web-based user interface with Flask application
-- **Knowledge Base** - Revenue management best practices and market data
-- **AWS Infrastructure** - CloudFormation templates for deployment
+### Core AI Agent System (`hotel_revenue_optimization/`)
+Multi-agent AI solution leveraging CrewAI and Amazon Bedrock AgentCore for revenue optimization:
+- **Version**: 2.1.0 - Production Ready
+- **Models**: Amazon Nova (Premier, Pro, Lite, Micro), Anthropic Claude (3.7 Sonnet, 3.5 Haiku, 3 Haiku)
+- **Provider Options**: AMAZON (default), ANTHROPIC, HYBRID
+- **Performance**: 46-52 seconds execution time (AWS environment)
+- **Input Formats**: Natural language, structured JSON, prompt-based
+- **Deployment**: AWS Bedrock AgentCore with Docker containerization
+
+### Web UI (`hotel_revenue_optimization_ui/`)
+Modern Flask-based web interface for hotel managers:
+- **Features**: Natural language queries, structured forms, query history
+- **Authentication**: AWS Cognito User Pools
+- **Deployment**: ECS Fargate with Application Load Balancer
+- **Infrastructure**: VPC, CloudFront CDN, CloudWatch monitoring
+- **Security**: IAM roles, security groups, secrets management
+
+### Knowledge Base
+- Historical booking data and pricing patterns
+- Competitor pricing information
+- Local events and seasonal patterns
+- Revenue management best practices
+
+### AWS Infrastructure
+- CloudFormation templates for automated deployment
+- Container registry (ECR) for Docker images
+- Monitoring and logging with CloudWatch
+
+## Quick Start
+
+### Core AI Agent
+```bash
+cd hotel_revenue_optimization
+pip install -e .
+# Configure environment variables in .env
+python -m src.hotel_revenue_optimization.main
+```
+
+### Web UI
+```bash
+cd hotel_revenue_optimization_ui
+./scripts/deploy.sh --env dev --region us-west-2
+# Or run locally
+flask run --debug
+```
+
+For detailed setup and deployment instructions, see the README files in each component directory.
 
 ## Security
 
