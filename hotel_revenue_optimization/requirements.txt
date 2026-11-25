@@ -2,11 +2,11 @@ crewai>=0.148.0,<1.0.0
 bedrock-agentcore
 boto3>=1.34.0
 
-# Development dependencies
-bedrock-agentcore-starter-toolkit==0.1.0
+# Development dependencies (0.1.13 or later: earlier releases are affected by CVE-2026-4269)
+bedrock-agentcore-starter-toolkit==0.1.13
 
-# OpenTelemetry dependencies - only what we need
-aws_opentelemetry_distro_genai_beta>=0.1.2
+# OpenTelemetry: the AWS Distro for OpenTelemetry (0.24.0 or later brings OpenTelemetry 1.45.2 or later)
+aws-opentelemetry-distro>=0.24.0
 
 # Prometheus metrics
 prometheus-client==0.20.0

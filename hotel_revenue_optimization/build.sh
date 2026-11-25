@@ -71,8 +71,13 @@ source venv/bin/activate
 # Set AWS profile
 export AWS_PROFILE=$AWS_PROFILE
 
-echo "Installing AgentCore SDK..."
-pip install bedrock-agentcore-sdk || pip install amazon-bedrock-agentcore || pip install agentcore || echo "AgentCore SDK not found in PyPI, checking if already installed..."
+echo "Installing the AgentCore SDK and starter toolkit (versions from requirements.txt)..."
+# Install only the packages AWS publishes, at the versions requirements.txt allows.
+# Never fall back to other package names: anyone can register a name AWS does not publish.
+if ! pip install -c requirements.txt bedrock-agentcore bedrock-agentcore-starter-toolkit; then
+  echo "❌ Could not install bedrock-agentcore and bedrock-agentcore-starter-toolkit (they need Python 3.10 or later)."
+  exit 1
+fi
 
 # Create backup folder with timestamp
 BACKUP_DIR="backup/$(date +%Y%m%d_%H%M%S)"
@@ -131,7 +136,7 @@ COPY requirements.txt requirements.txt
 # Install from requirements file
 RUN uv pip install -r requirements.txt
 
-RUN uv pip install aws-opentelemetry-distro>=0.10.1
+RUN uv pip install "aws-opentelemetry-distro>=0.24.0"
 
 # Set AWS region environment variable
 ENV AWS_REGION=us-east-1
@@ -139,6 +144,10 @@ ENV AWS_DEFAULT_REGION=us-east-1
 
 # Signal that this is running in Docker for host binding logic
 ENV DOCKER_CONTAINER=1
+
+# The CrewAI instrumentation in aws-opentelemetry-distro 0.24 expects CrewAI 1.x events and fails every
+# CrewAI 0.x run; Bedrock calls are still traced through botocore
+ENV OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=aws_crewai
 
 # Create non-root user
 RUN useradd -m -u 1000 bedrock_agentcore

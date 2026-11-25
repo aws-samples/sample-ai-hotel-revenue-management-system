@@ -1,0 +1,17 @@
+# Local secrets and environments
+.env
+.env.*
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Run output, logs and backups written by the scripts
+output/
+logs/
+backup/
+
+# Written by agentcore configure; holds your account ID, role and runtime IDs
+.bedrock_agentcore.yaml
