@@ -214,13 +214,13 @@ wait
 ### Real-time Log Monitoring
 ```bash
 # Monitor logs while testing
-aws logs tail /aws/bedrock-agentcore/runtimes/hotel_revenue_optimization-2OYNqEGtl3-DEFAULT --follow
+aws logs tail /aws/bedrock-agentcore/runtimes/<your-runtime-id>-DEFAULT --follow
 ```
 
 ### Error Log Analysis
 ```bash
 # Check for errors in recent logs
-aws logs tail /aws/bedrock-agentcore/runtimes/hotel_revenue_optimization-2OYNqEGtl3-DEFAULT --since 1h | grep -i error
+aws logs tail /aws/bedrock-agentcore/runtimes/<your-runtime-id>-DEFAULT --since 1h | grep -i error
 ```
 
 ## Validation Checklist
@@ -275,7 +275,7 @@ aws logs tail /aws/bedrock-agentcore/runtimes/hotel_revenue_optimization-2OYNqEG
 If tests fail or you encounter issues:
 
 1. Check the [CHANGELOG.md](CHANGELOG.md) for recent changes
-2. Review logs: `aws logs tail /aws/bedrock-agentcore/runtimes/hotel_revenue_optimization-2OYNqEGtl3-DEFAULT --since 1h`
+2. Review logs: `aws logs tail /aws/bedrock-agentcore/runtimes/<your-runtime-id>-DEFAULT --since 1h`
 3. Verify agent status: `agentcore status`
 4. Test with simple structured input first
 5. Escalate to development team with specific error messages and logs

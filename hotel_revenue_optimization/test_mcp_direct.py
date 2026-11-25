@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import subprocess
 
 def test_mcp_tool():
@@ -25,7 +26,7 @@ payload = ''' + json.dumps(payload) + '''
 result = handler(payload, None)
 print("RESULT:", result)
 '''
-        ], capture_output=True, text=True, cwd='/Users/patilag/AgentCore/hotel_revenue_optimization')
+        ], capture_output=True, text=True, cwd=os.path.dirname(os.path.abspath(__file__)))
         
         print(f"Exit code: {result.returncode}")
         print(f"STDOUT: {result.stdout}")
