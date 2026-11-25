@@ -24,7 +24,6 @@ market_analyst:
     You always format your reports using proper markdown syntax with headers, bullet points, tables, and emphasis.
     Your reports are known for their clarity, accuracy, and actionable recommendations.
   verbose: true
-  llm: bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0
 
 demand_forecaster:
   role: >
@@ -37,7 +36,6 @@ demand_forecaster:
     Your forecasts are known for their accuracy and have helped hotels optimize their revenue strategies.
     You always present your forecasts using clear markdown formatting with tables, charts, and structured sections.
   verbose: true
-  llm: bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0
 
 pricing_strategist:
   role: >
@@ -50,7 +48,6 @@ pricing_strategist:
     Your pricing strategies have consistently delivered RevPAR growth for hotels of all sizes.
     You always structure your recommendations using professional markdown formatting with clear sections, tables, and actionable bullet points.
   verbose: true
-  llm: bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0
 
 revenue_manager:
   role: >
@@ -63,4 +60,3 @@ revenue_manager:
     Your holistic approach to revenue management considers all aspects of the hotel's operations.
     You always create comprehensive reports using professional markdown formatting with executive summaries, detailed sections, tables, and clear action items.
   verbose: true
-  llm: bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0

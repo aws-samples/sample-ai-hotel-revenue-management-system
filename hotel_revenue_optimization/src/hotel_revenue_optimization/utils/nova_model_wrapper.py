@@ -1,122 +1,146 @@
 """
-Nova Model Wrapper for handling Amazon Nova models alongside Anthropic models.
-This wrapper provides compatibility for Nova models that may not be fully supported by LiteLLM yet.
+Bedrock Converse wrapper for the models the crew uses (Amazon Nova and Anthropic Claude).
+
+Current Nova and Claude text models are called through cross-region inference profiles, so this wrapper turns
+the configured model ID ("bedrock/<base model id>") into an inference profile ID and calls the Converse API.
+Errors are raised rather than returned as text, so a retired or misconfigured model fails loudly instead of
+ending up inside a report.
 """
 
 import os
-import json
-import boto3
 from typing import Dict, Any, Optional, List
+
+import boto3
 from botocore.config import Config
 
+# Prefixes of system-defined cross-region inference profiles
+PROFILE_PREFIXES = ("us.", "eu.", "apac.", "jp.", "au.", "ca.", "us-gov.", "global.")
+MAX_TOKENS = 8000
+
+
+def _base_model_id(model_id: str) -> str:
+    return model_id.removeprefix("bedrock/").removeprefix("converse/")
+
+
+def to_inference_profile_id(model_id: str) -> str:
+    """Return the inference profile ID (or ARN) to call for a configured model ID.
+
+    "bedrock/amazon.nova-2-lite-v1:0" becomes "us.amazon.nova-2-lite-v1:0" with the default prefix. IDs that
+    already carry a profile prefix, and ARNs (application inference profiles), are used as they are.
+    """
+    base = _base_model_id(model_id)
+    if base.startswith("arn:") or base.startswith(PROFILE_PREFIXES):
+        return base
+    prefix = os.environ.get("BEDROCK_INFERENCE_PROFILE_PREFIX", "us").strip().rstrip(".")
+    return f"{prefix}.{base}"
+
+
+def inference_config_for(profile_id: str) -> Dict[str, Any]:
+    """Inference settings per model family.
+
+    Claude 5 models reject both temperature and top_p, so only maxTokens is sent to non-Nova models.
+    """
+    if "amazon.nova" in profile_id:
+        return {"maxTokens": MAX_TOKENS, "temperature": 0.7, "topP": 0.9}
+    return {"maxTokens": MAX_TOKENS}
+
+
+def additional_fields_for(profile_id: str) -> Dict[str, Any]:
+    """Model-specific request fields.
+
+    Claude 5 models reason before they answer by default, and on long CrewAI prompts that reasoning can use the
+    whole output budget, leaving no text. BEDROCK_CLAUDE_EFFORT (default "low"; also "medium" or "high") sets
+    the effort level. Set it to an empty value for Claude models that reject the effort parameter
+    (Claude Sonnet 4.5, Haiku 4.5 and earlier).
+    """
+    if "anthropic." in profile_id:
+        effort = os.environ.get("BEDROCK_CLAUDE_EFFORT", "low").strip()
+        if effort:
+            return {"output_config": {"effort": effort}}
+    return {}
+
+
 class NovaModelWrapper:
-    """Wrapper to handle Nova models with direct Bedrock API calls when LiteLLM doesn't support them."""
-    
+    """Calls Bedrock models through the Converse API and cross-region inference profiles."""
+
     def __init__(self):
-        # Configure boto3 client with extended timeout for Nova models
         self.bedrock_client = boto3.client(
             'bedrock-runtime',
             region_name=os.environ.get('AWS_REGION', 'us-west-2'),
             config=Config(
                 connect_timeout=3600,  # 60 minutes
                 read_timeout=3600,     # 60 minutes
-                retries={'max_attempts': 1}
+                retries={'max_attempts': 3, 'mode': 'adaptive'}
             )
         )
-    
-    def is_nova_model(self, model_id: str) -> bool:
-        """Check if the model requires inference profiles (Nova models or latest Claude models)."""
-        return ('amazon.nova' in model_id or 
-                'claude-sonnet-4' in model_id or 
-                'claude-opus-4' in model_id or
-                'claude-3-7-sonnet' in model_id)
-    
-    def convert_to_nova_format(self, messages: List[Dict], system_prompt: Optional[str] = None) -> Dict[str, Any]:
-        """Convert standard chat format to Nova API format."""
-        nova_request = {
-            "messages": [],
-            "inferenceConfig": {
-                "maxTokens": 8000,  # Conservative increase from 4K to 8K
-                "temperature": 0.7,
-                "topP": 0.9
-            }
-        }
-        
-        # Add system prompt if provided
+
+    def requires_inference_profile(self, model_id: str) -> bool:
+        """True for Bedrock Nova and Claude model IDs, which this wrapper calls through inference profiles."""
+        base = _base_model_id(model_id)
+        return base.startswith(("amazon.", "anthropic.", "arn:")) or base.startswith(PROFILE_PREFIXES)
+
+    # Name used by earlier versions of this sample
+    is_nova_model = requires_inference_profile
+
+    def convert_to_nova_format(self, messages: List[Dict], system_prompt: Optional[str] = None,
+                               profile_id: str = "") -> Dict[str, Any]:
+        """Convert chat messages to a Converse request.
+
+        Converse needs alternating user and assistant turns, so consecutive messages from the same role are
+        merged and empty messages are dropped.
+        """
+        request: Dict[str, Any] = {"messages": [], "inferenceConfig": inference_config_for(profile_id)}
+        extra_fields = additional_fields_for(profile_id)
+        if extra_fields:
+            request["additionalModelRequestFields"] = extra_fields
+
         if system_prompt:
-            nova_request["system"] = [{"text": system_prompt}]
-        
-        # Convert messages to Nova format
+            request["system"] = [{"text": system_prompt}]
+
         for msg in messages:
-            if isinstance(msg.get('content'), str):
-                # Simple string content
-                nova_msg = {
-                    "role": msg["role"],
-                    "content": [{"text": msg["content"]}]
-                }
+            content = msg.get('content')
+            if isinstance(content, str):
+                if not content.strip():
+                    continue
+                blocks = [{"text": content}]
             else:
-                # Already in proper format
-                nova_msg = msg
-            
-            nova_request["messages"].append(nova_msg)
-        
-        return nova_request
-    
+                blocks = content or []
+                if not blocks:
+                    continue
+            if request["messages"] and request["messages"][-1]["role"] == msg["role"]:
+                request["messages"][-1]["content"].extend(blocks)
+            else:
+                request["messages"].append({"role": msg["role"], "content": list(blocks)})
+
+        return request
+
     def invoke_nova_model(self, model_id: str, messages: List[Dict], system_prompt: Optional[str] = None) -> str:
-        """Invoke models that require inference profiles (Nova and latest Claude models)."""
+        """Invoke a model through its inference profile and return the response text. Raises on failure."""
+        profile_id = to_inference_profile_id(model_id)
+        request_body = self.convert_to_nova_format(messages, system_prompt, profile_id)
+
         try:
-            # Convert to proper format
-            request_body = self.convert_to_nova_format(messages, system_prompt)
-            
-            # Map model IDs to inference profile IDs
-            model_to_profile_map = {
-                # Nova models
-                'bedrock/amazon.nova-premier-v1:0': 'us.amazon.nova-premier-v1:0',
-                'bedrock/amazon.nova-pro-v1:0': 'us.amazon.nova-pro-v1:0',
-                'bedrock/amazon.nova-lite-v1:0': 'us.amazon.nova-lite-v1:0',
-                'bedrock/amazon.nova-micro-v1:0': 'us.amazon.nova-micro-v1:0',
-                # Latest Claude models requiring inference profiles
-                'bedrock/anthropic.claude-sonnet-4-20250514-v1:0': 'us.anthropic.claude-sonnet-4-20250514-v1:0',
-                'bedrock/anthropic.claude-opus-4-20250514-v1:0': 'us.anthropic.claude-opus-4-20250514-v1:0',
-                'bedrock/anthropic.claude-opus-4-1-20250805-v1:0': 'us.anthropic.claude-opus-4-1-20250805-v1:0',
-                'bedrock/anthropic.claude-3-7-sonnet-20250219-v1:0': 'us.anthropic.claude-3-7-sonnet-20250219-v1:0'
-            }
-            
-            # Get the inference profile ID
-            profile_id = model_to_profile_map.get(model_id)
-            if not profile_id:
-                return f"Error: No inference profile found for model {model_id}"
-            
-            # Make the API call using inference profile
-            response = self.bedrock_client.converse(
-                modelId=profile_id,
-                **request_body
-            )
-            
-            # Extract text from response
-            if 'output' in response and 'message' in response['output']:
-                content = response['output']['message'].get('content', [])
-                if content and 'text' in content[0]:
-                    return content[0]['text']
-            
-            return "Error: No valid response from model"
-            
+            response = self.bedrock_client.converse(modelId=profile_id, **request_body)
         except Exception as e:
-            return f"Error invoking model: {str(e)}"
-    
+            raise RuntimeError(f"Bedrock call to {profile_id} failed: {e}") from e
+
+        content = response.get('output', {}).get('message', {}).get('content', [])
+        texts = [block['text'] for block in content if 'text' in block]
+        if not texts:
+            raise RuntimeError(f"Bedrock model {profile_id} returned no text (stopReason={response.get('stopReason')})")
+        return "".join(texts)
+
     def get_fallback_model(self, failed_model: str) -> Optional[str]:
-        """Get a fallback model when Nova model fails."""
-        # Map Nova models to Claude equivalents
-        nova_to_claude_map = {
-            'amazon.nova-premier-v1:0': 'anthropic.claude-3-5-sonnet-20241022-v2:0',
-            'amazon.nova-pro-v1:0': 'anthropic.claude-3-5-haiku-20241022-v1:0',
-            'amazon.nova-lite-v1:0': 'anthropic.claude-3-haiku-20240307-v1:0',
-            'amazon.nova-micro-v1:0': 'amazon.titan-text-express-v1'
-        }
-        
-        clean_model = failed_model.replace('bedrock/', '')
-        fallback = nova_to_claude_map.get(clean_model)
-        return f"bedrock/{fallback}" if fallback else None
+        """A different model to retry with: the active provider's tier4 model, or its tier3 model if that failed."""
+        from .model_config import get_active_tiers
+
+        tiers = get_active_tiers()
+        for tier in ("tier4", "tier3"):
+            candidate = tiers[tier][0]
+            if to_inference_profile_id(candidate) != to_inference_profile_id(failed_model):
+                return candidate
+        return None
+
 
 # Global instance
 nova_wrapper = NovaModelWrapper()

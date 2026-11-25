@@ -1,46 +1,68 @@
 """
-Model configuration utility with provider-based tiers for easy switching.
+Model configuration: the one place that names the Amazon Bedrock models the crew uses.
+
+Each provider has four tiers and each agent is assigned a tier (DEFAULT_MODEL_ASSIGNMENTS below). Model IDs
+are Bedrock base model IDs with LiteLLM's "bedrock/" prefix. The crew calls every model through a cross-region
+inference profile, made by putting BEDROCK_INFERENCE_PROFILE_PREFIX in front of the base model ID
+(see nova_model_wrapper.to_inference_profile_id).
+
+Environment variables (all optional):
+  MODEL_PROVIDER                    AMAZON (default), ANTHROPIC or HYBRID
+  MODEL_TIER1 ... MODEL_TIER4       replace one tier's model for the active provider
+  MODEL_<AGENT>                     replace one agent's model, for example MODEL_PRICING_STRATEGIST
+  <AGENT>_LLM_TIER                  move one agent to another tier, for example PRICING_STRATEGIST_LLM_TIER=tier2
+  BEDROCK_INFERENCE_PROFILE_PREFIX  inference profile geography: us (default), eu, apac or global
+  BEDROCK_CLAUDE_EFFORT             Claude effort level: low (default), medium or high; empty to omit
+
+To move to newer models, follow "Updating models and AWS package versions" in the README.
+Last checked against `aws bedrock list-foundation-models` (ACTIVE models) on 2026-11-25.
 """
 
 import os
 from typing import Dict, List, Any, Optional
 
-# Amazon Nova Models - AWS's latest multimodal models
+# Amazon Nova models: Nova 2 Lite is the current Nova text model; Nova Micro has no successor yet.
 AMAZON_TIERS = {
-    "tier1": ["bedrock/amazon.nova-premier-v1:0"],      # Complex reasoning - highest capability
-    "tier2": ["bedrock/amazon.nova-pro-v1:0"],          # Medium complexity - balanced performance
-    "tier3": ["bedrock/amazon.nova-lite-v1:0"],         # Simple tasks - fast and cost-effective
-    "tier4": ["bedrock/amazon.nova-micro-v1:0"]         # Basic tasks - ultra-fast
+    "tier1": ["bedrock/amazon.nova-2-lite-v1:0"],       # Complex reasoning
+    "tier2": ["bedrock/amazon.nova-2-lite-v1:0"],       # Medium complexity - balanced performance
+    "tier3": ["bedrock/amazon.nova-2-lite-v1:0"],       # Simple tasks - fast and cost-effective
+    "tier4": ["bedrock/amazon.nova-micro-v1:0"]         # Basic tasks - fastest, lowest cost
 }
 
-# Anthropic Claude Models - Advanced reasoning models
+# Anthropic Claude models
 ANTHROPIC_TIERS = {
-    "tier1": ["bedrock/anthropic.claude-3-7-sonnet-20250219-v1:0"],      # Complex reasoning - with prompt caching
-    "tier2": ["bedrock/anthropic.claude-3-7-sonnet-20250219-v1:0"],      # Medium complexity - with prompt caching
-    "tier3": ["bedrock/anthropic.claude-3-5-haiku-20241022-v1:0"],       # Simple tasks - fast and capable
-    "tier4": ["bedrock/anthropic.claude-3-haiku-20240307-v1:0"]          # Basic tasks - cost-effective
+    "tier1": ["bedrock/anthropic.claude-sonnet-5-5"],   # Complex reasoning
+    "tier2": ["bedrock/anthropic.claude-sonnet-5-5"],   # Medium complexity
+    "tier3": ["bedrock/anthropic.claude-haiku-5-5"],    # Simple tasks - fast and capable
+    "tier4": ["bedrock/anthropic.claude-haiku-5-5"]     # Basic tasks - cost-effective
 }
 
-# Provider selection - AMAZON (default), ANTHROPIC, or HYBRID
+# Provider selection - AMAZON (default), ANTHROPIC, or HYBRID (read again on every lookup)
 ACTIVE_PROVIDER = os.environ.get("MODEL_PROVIDER", "AMAZON")
 
 # Hybrid configuration - best of both providers
 HYBRID_TIERS = {
-    "tier1": ["bedrock/anthropic.claude-3-7-sonnet-20250219-v1:0"],      # Anthropic 3.7 for complex reasoning (with prompt caching)
-    "tier2": ["bedrock/amazon.nova-pro-v1:0"],                           # Amazon for medium tasks
-    "tier3": ["bedrock/amazon.nova-lite-v1:0"],                          # Amazon for simple tasks
-    "tier4": ["bedrock/amazon.nova-micro-v1:0"]                          # Amazon for basic tasks
+    "tier1": ["bedrock/anthropic.claude-sonnet-5-5"],   # Claude for complex reasoning
+    "tier2": ["bedrock/amazon.nova-2-lite-v1:0"],       # Nova for medium tasks
+    "tier3": ["bedrock/amazon.nova-2-lite-v1:0"],       # Nova for simple tasks
+    "tier4": ["bedrock/amazon.nova-micro-v1:0"]         # Nova for basic tasks
 }
 
 # Select active tier configuration
 def get_active_tiers() -> Dict[str, List[str]]:
-    """Get the active tier configuration based on provider selection."""
+    """Get the active provider's tiers, with any MODEL_TIER1..MODEL_TIER4 overrides applied."""
     provider_map = {
         "AMAZON": AMAZON_TIERS,
         "ANTHROPIC": ANTHROPIC_TIERS,
         "HYBRID": HYBRID_TIERS
     }
-    return provider_map.get(ACTIVE_PROVIDER, AMAZON_TIERS)
+    provider = os.environ.get("MODEL_PROVIDER", ACTIVE_PROVIDER).upper()
+    tiers = {name: list(models) for name, models in provider_map.get(provider, AMAZON_TIERS).items()}
+    for name in tiers:
+        override = os.environ.get(f"MODEL_{name.upper()}")
+        if override:
+            tiers[name] = [override]
+    return tiers
 
 # Current active tiers
 MODEL_TIERS = get_active_tiers()

@@ -65,7 +65,7 @@ Each log entry includes the following information:
 
 Example log entry:
 ```
-2025-07-21 02:15:30 - HotelRevenueOptimization - INFO - MODEL_INVOKE STARTED | Agent: pricing_strategist | Model: anthropic.claude-3-sonnet-20240229-v1:0 | Task: pricing_strategy_task | Crew: HotelRevenueOptimizationCrew
+2025-07-21 02:15:30 - HotelRevenueOptimization - INFO - MODEL_INVOKE STARTED | Agent: pricing_strategist | Model: anthropic.claude-sonnet-5-5 | Task: pricing_strategy_task | Crew: HotelRevenueOptimizationCrew
 ```
 
 ## OpenTelemetry Integration
@@ -115,7 +115,7 @@ The system returns responses in the following format:
       "error_details": {
         "error_code": "ThrottlingException",
         "retry_attempts": 5,
-        "model_id": "anthropic.claude-3-sonnet-20240229-v1:0"
+        "model_id": "anthropic.claude-sonnet-5-5"
       }
     },
     "revenue_management_task": {
@@ -138,8 +138,8 @@ The system returns responses in the following format:
         "pricing_strategy_task": 15.2
       },
       "model_latencies": {
-        "anthropic.claude-3-haiku-20240307-v1:0": 2.5,
-        "anthropic.claude-3-sonnet-20240229-v1:0": 3.3
+        "anthropic.claude-haiku-5-5": 2.5,
+        "anthropic.claude-sonnet-5-5": 3.3
       }
     }
   },
