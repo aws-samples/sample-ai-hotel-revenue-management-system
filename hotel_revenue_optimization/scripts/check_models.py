@@ -49,8 +49,12 @@ def main() -> int:
     try:
         for provider in providers:
             os.environ["MODEL_PROVIDER"] = provider
+            # Every tier (fallbacks use tier3 and tier4) and every agent's effective model, which
+            # MODEL_<AGENT> and <AGENT>_LLM_TIER can change
             for tier, models in model_config.get_active_tiers().items():
                 usage.setdefault(models[0], []).append(f"{provider}/{tier}")
+            for agent in model_config.DEFAULT_MODEL_ASSIGNMENTS:
+                usage.setdefault(model_config.get_model_for_agent(agent), []).append(f"{provider}/{agent}")
     finally:
         if saved is None:
             os.environ.pop("MODEL_PROVIDER", None)
@@ -70,6 +74,9 @@ def main() -> int:
                 **({"additionalModelRequestFields": extra} if extra else {}),
             )
             text = "".join(b.get("text", "") for b in response["output"]["message"]["content"]).strip()
+            if not text:
+                # For example a reasoning-only answer cut off by maxTokens: the crew would get no text either
+                raise RuntimeError(f"no answer text (stopReason={response.get('stopReason')})")
             print(f"PASS  {profile_id:<40} {', '.join(used_by)}  -> {text[:20]!r}")
         except Exception as e:  # noqa: BLE001 - report every failure and keep going
             failures += 1

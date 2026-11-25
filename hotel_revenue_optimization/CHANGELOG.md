@@ -25,7 +25,8 @@ earlier version, recreate your virtual environment (see "Install AgentCore CLI" 
 - **Account-specific files removed**: `create_correct_target.sh` and `authorizer_config.json`, and the AWS account
   ID, runtime ARN and monitoring workspace ID of the original deployment.
 - **Web UI**: Cognito ID tokens are verified (signature against the user pool keys, issuer, audience, token use,
-  expiry) before a session is created, and `/auth/process-token` takes the identity only from a verified token;
+  expiry) before a session is created; sign-in accepts only the authorization code flow, so a token in a
+  callback URL can no longer sign a visitor in (the implicit-flow page and `/auth/process-token` are removed);
   production refuses to start without a strong `SECRET_KEY`, which the stack now generates in AWS Secrets
   Manager along with passing the Cognito client secret as a secret; sign-in uses `state` and PKCE; `next`
   redirects stay on the site; rendered reports are sanitized; email reports go only to the signed-in user's
@@ -42,6 +43,8 @@ earlier version, recreate your virtual environment (see "Install AgentCore CLI" 
 - **Claude 5 requests**: Claude 5 models reject `temperature` and `top_p`, and reason before they answer by
   default; requests to Claude send only `maxTokens` and an effort level (default `low`).
 - `MODEL_PROVIDER` is read on every lookup instead of once at import.
+- Web UI: `AGENTCORE_TIMEOUT` and `AWS_READ_TIMEOUT` default to 360 seconds (from 120), since a report takes about
+  70 to 270 seconds depending on the provider.
 
 ### Fixed
 - A failed model call was returned as report text ("Error invoking model ..."); it now raises, and the call is
@@ -51,13 +54,15 @@ earlier version, recreate your virtual environment (see "Install AgentCore CLI" 
 - CrewAI's planning step forced a tool call, which Claude 5 rejects; the crew now uses CrewAI's text path, and
   reruns without planning if the planner's output cannot be parsed.
 - CrewAI 0.203 waited 20 seconds for an answer to a first-run trace prompt on every new runtime session.
-- The CrewAI instrumentation in `aws-opentelemetry-distro` 0.24 fails every CrewAI 0.x run, so the container
-  images set `OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=aws_crewai`; Bedrock calls are still traced.
+- The CrewAI instrumentation in `aws-opentelemetry-distro` 0.24 fails every CrewAI 0.x run. The app turns it off
+  at startup, and the container images also set `OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=aws_crewai`, so images
+  built from any Dockerfile work; Bedrock calls are still traced.
 - Web UI: `app/services/email_report.py` did not parse, so the UI could not start; Flask-WTF 1.1.1 did not import
   with Werkzeug 3; the `ecs.yaml` security groups referenced each other, so the stack could not deploy.
 
 ### Added
-- `scripts/check_models.py` checks that every configured model answers in your Region.
+- `scripts/check_models.py` checks that every configured model, including `MODEL_<AGENT>` overrides, answers
+  with text in your Region.
 - README section "Updating models and AWS package versions".
 
 ### Known issues

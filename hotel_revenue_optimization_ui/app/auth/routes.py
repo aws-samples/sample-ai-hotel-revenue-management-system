@@ -97,9 +97,11 @@ def callback():
 
     code = request.args.get('code')
     if not code:
-        # This endpoint is used for the implicit grant flow
-        # The tokens are returned in the URL fragment, which is processed by JavaScript
-        return render_template('auth/callback.html', next_url=url_for('main.index'))
+        # The Cognito app client allows only the authorization code flow (cognito.yaml AllowedOAuthFlows). A
+        # callback without a code is not a sign-in this browser started, so tokens in it are never accepted:
+        # signing in from a token in the URL would let anyone sign a victim into the sender's account.
+        logger.warning("Rejected a sign-in callback without an authorization code")
+        return _auth_error("The sign-in response is missing its authorization code. Please sign in again.", 400)
 
     received_state = request.args.get('state') or ''
     if not expected_state or not code_verifier or not hmac.compare_digest(
@@ -162,30 +164,6 @@ def callback():
     establish_session(claims)
     logger.info(f"User signed in: sub={claims['sub']}")
     return redirect(next_url)
-
-@bp.route('/process-token', methods=['POST'])
-def process_token():
-    """Sign in with an ID token posted by the implicit-flow page (templates/auth/callback.html).
-
-    The token must pass the same verification as in the code flow. The identity and the expiry come
-    from its verified claims; anything else in the request body (sub, email, name, expires_at, tokens)
-    is ignored.
-    """
-    data = request.get_json(silent=True)
-    
-    if not isinstance(data, dict) or not data.get('id_token'):
-        return jsonify({'error': 'Invalid request'}), 400
-
-    try:
-        claims = verify_id_token(data['id_token'])
-    except TokenVerificationError as e:
-        logger.warning(f"Rejected an ID token posted to process-token: {e}")
-        return jsonify({'error': 'Invalid token'}), 401
-
-    establish_session(claims)
-    logger.info(f"User signed in: sub={claims['sub']}")
-    
-    return jsonify({'success': True, 'redirect': url_for('main.index')})
 
 @bp.route('/logout')
 def logout():

@@ -23,9 +23,10 @@ class Config:
     AGENTCORE_ENDPOINT = os.environ.get('AGENTCORE_ENDPOINT', '')
     
     # Timeout Configuration
-    AGENTCORE_TIMEOUT = int(os.environ.get('AGENTCORE_TIMEOUT', '120'))  # 2 minutes
+    # A report takes about 70 to 270 seconds depending on MODEL_PROVIDER; allow 6 minutes
+    AGENTCORE_TIMEOUT = int(os.environ.get('AGENTCORE_TIMEOUT', '360'))
     AWS_CONNECT_TIMEOUT = int(os.environ.get('AWS_CONNECT_TIMEOUT', '10'))  # 10 seconds
-    AWS_READ_TIMEOUT = int(os.environ.get('AWS_READ_TIMEOUT', '120'))  # 2 minutes
+    AWS_READ_TIMEOUT = int(os.environ.get('AWS_READ_TIMEOUT', '360'))  # the agent answers when the report is done
     
     # Cognito Configuration
     COGNITO_REGION = os.environ.get('COGNITO_REGION', AWS_REGION)

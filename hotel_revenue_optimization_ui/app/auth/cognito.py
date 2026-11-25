@@ -60,9 +60,9 @@ def token_required(f):
     """
     Decorator that serves the view only to a user whose identity the server has verified.
 
-    The identity comes from the session, which the server sets only after verifying a Cognito ID token
-    (code exchange in /auth/callback, or /auth/process-token), or from an Authorization: Bearer ID token
-    that passes the same verification (app.auth.tokens.verify_id_token).
+    The identity comes from the session, which the server sets only after verifying the Cognito ID token
+    from the authorization code exchange in /auth/callback, or from an Authorization: Bearer ID token that
+    passes the same verification (app.auth.tokens.verify_id_token).
     """
     @wraps(f)
     def decorated(*args, **kwargs):

@@ -59,8 +59,8 @@ def invoke_agentcore(payload, session_id=None):
     
     # Get timeout configurations
     connect_timeout = current_app.config.get('AWS_CONNECT_TIMEOUT', 10)
-    read_timeout = current_app.config.get('AWS_READ_TIMEOUT', 120)
-    agentcore_timeout = current_app.config.get('AGENTCORE_TIMEOUT', 120)
+    read_timeout = current_app.config.get('AWS_READ_TIMEOUT', 360)
+    agentcore_timeout = current_app.config.get('AGENTCORE_TIMEOUT', 360)
     
     logger.info(f"Timeout settings - Connect: {connect_timeout}s, Read: {read_timeout}s, AgentCore: {agentcore_timeout}s")
     

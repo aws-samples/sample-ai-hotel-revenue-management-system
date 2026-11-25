@@ -23,6 +23,15 @@ try:
 except Exception:  # older or newer CrewAI without this helper
     pass
 
+# The CrewAI instrumentation in aws-opentelemetry-distro 0.24 expects CrewAI 1.x events and fails every CrewAI 0.x
+# run. The Dockerfiles turn it off with OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=aws_crewai; turning it off here too
+# covers images built from any other Dockerfile, such as the one agentcore configure writes.
+try:
+    from amazon.opentelemetry.distro.instrumentation.crewai import CrewAIInstrumentor
+    CrewAIInstrumentor().uninstrument()
+except Exception:  # ADOT not installed, or a version without this instrumentation
+    pass
+
 app = BedrockAgentCoreApp()
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")

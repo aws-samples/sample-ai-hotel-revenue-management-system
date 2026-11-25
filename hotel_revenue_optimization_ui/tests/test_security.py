@@ -244,44 +244,26 @@ def test_anonymous_user_is_sent_to_login_with_a_relative_next(client):
     assert parse_qs(location.query)['next'] == ['/history?page=2']
 
 
-# 3. /auth/process-token
+# 3. No sign-in from tokens in the URL (implicit flow removed)
 
-def test_process_token_takes_the_identity_from_the_verified_token_only(client):
-    response = client.post('/auth/process-token', json={
-        'id_token': sign(id_token_claims()),
-        'access_token': 'anything',
-        'sub': 'attacker-chosen-sub',
-        'email': 'attacker@example.net',
-        'name': 'Attacker',
-        'expires_at': int(time.time()) + 10 * 365 * 86400,
-    })
-    assert response.status_code == 200
-    with client.session_transaction() as sess:
-        assert sess['user']['sub'] == 'verified-user-sub'
-        assert sess['user']['email'] == 'verified.user@example.com'
-        assert sess['user']['name'] == 'Verified User'
-        assert sess['token_expiration'] <= int(time.time()) + 3600
-        assert 'id_token' not in sess and 'access_token' not in sess
-
-
-@untrusted_tokens
-def test_process_token_rejects_untrusted_tokens(client, make_token):
-    response = client.post('/auth/process-token', json={
-        'id_token': make_token(), 'sub': 'attacker-chosen-sub', 'email': 'attacker@example.net'})
-    assert response.status_code == 401
+def test_callback_without_a_code_signs_nobody_in(client):
+    # A link such as /auth/callback#id_token=<someone's valid token> reaches the server as a callback without
+    # a code; it must not render a page that signs the visitor in with that token
+    response = client.get('/auth/callback')
+    assert response.status_code == 400
+    assert 'process-token' not in response.get_data(as_text=True)
     assert session_user(client) is None
 
 
-def test_process_token_without_a_token_signs_nobody_in(client):
-    response = client.post('/auth/process-token', json={'sub': 'attacker-chosen-sub', 'email': 'attacker@example.net'})
+def test_callback_with_a_token_in_the_query_signs_nobody_in(client):
+    response = client.get('/auth/callback', query_string={'id_token': sign(id_token_claims())})
     assert response.status_code == 400
     assert session_user(client) is None
 
 
-def test_process_token_still_requires_the_csrf_token():
-    client = production_app().test_client()
+def test_process_token_endpoint_is_gone(client):
     response = client.post('/auth/process-token', json={'id_token': sign(id_token_claims())})
-    assert response.status_code == 400
+    assert response.status_code in (404, 405)
     assert session_user(client) is None
 
 
