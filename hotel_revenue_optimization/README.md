@@ -8,7 +8,7 @@ The Hotel Revenue Optimization System is a multi-agent AI solution that leverage
 |---------------------|------------------------------------------------------------------------------|
 | Agent type          | Synchronous                                                                 |
 | Agentic Framework   | CrewAI                                                                      |
-| LLM models          | Amazon Nova (Premier, Pro, Lite, Micro), Anthropic Claude (3.7 Sonnet, 3.5 Haiku, 3 Haiku) |
+| LLM models          | Amazon Nova (Nova 2 Lite, Nova Micro), Anthropic Claude (Sonnet 5.5, Haiku 5.5) |
 | Components          | AgentCore Runtime, Multi-agent collaboration                                |
 | Example complexity  | Medium-High                                                                 |
 | SDK used            | Amazon BedrockAgentCore Python SDK                                          |
@@ -52,10 +52,10 @@ graph TB
         CREW["Hotel Revenue Optimization Crew Manager"]
         
         subgraph "Multi-Agent Crew"
-            MA[Market Analyst Agent<br/>Claude 3 Haiku]
-            DF[Demand Forecaster Agent<br/>Claude 3 Sonnet]
-            PS[Pricing Strategist Agent<br/>Claude 3 Opus]
-            RM[Revenue Manager Agent<br/>Claude 3 Sonnet]
+            MA[Market Analyst Agent<br/>Tier 2 model]
+            DF[Demand Forecaster Agent<br/>Tier 2 model]
+            PS[Pricing Strategist Agent<br/>Tier 1 model]
+            RM[Revenue Manager Agent<br/>Tier 2 model]
         end
     end
 
@@ -176,11 +176,11 @@ sequenceDiagram
     
     par Market Analysis
         Crew->>MA: Analyze market trends
-        MA->>Bedrock: Claude 3 Haiku request
+        MA->>Bedrock: Tier 2 model request
         Bedrock-->>MA: Market insights
     and Demand Forecasting
         Crew->>DF: Forecast demand patterns
-        DF->>Bedrock: Claude 3 Sonnet request
+        DF->>Bedrock: Tier 2 model request
         Bedrock-->>DF: Demand predictions
     end
     
@@ -188,12 +188,12 @@ sequenceDiagram
     DF-->>Crew: Demand forecast results
     
     Crew->>PS: Develop pricing strategy
-    PS->>Bedrock: Claude 3 Opus request
+    PS->>Bedrock: Tier 1 model request
     Bedrock-->>PS: Pricing recommendations
     PS-->>Crew: Pricing strategy
     
     Crew->>RM: Generate revenue plan
-    RM->>Bedrock: Claude 3 Sonnet request
+    RM->>Bedrock: Tier 2 model request
     Bedrock-->>RM: Revenue optimization plan
     RM-->>Output: Formatted markdown report
     
@@ -269,14 +269,14 @@ graph TB
     
     subgraph "AWS Cloud Infrastructure"
         subgraph "Bedrock AgentCore"
-            RUNTIME[AgentCore Runtime<br/>hotel_revenue_optimization-2OYNqEGtl3]
+            RUNTIME[AgentCore Runtime<br/>hotel_revenue_optimization]
             EXEC[Execution Environment]
         end
         
         subgraph "Amazon Bedrock"
-            CLAUDE_H[Claude 3 Haiku]
-            CLAUDE_S[Claude 3 Sonnet]
-            CLAUDE_O[Claude 3 Opus]
+            CLAUDE_H[Amazon Nova 2 Lite and Nova Micro]
+            CLAUDE_S[Claude Sonnet 5.5]
+            CLAUDE_O[Claude Haiku 5.5]
         end
         
         subgraph "Container Services"
@@ -318,22 +318,22 @@ graph TB
 
 ### Agent Roles
 
-1. **Market Analyst Agent** (Claude 3 Haiku)
+1. **Market Analyst Agent** (tier 2 model)
    - Monitors market trends and competitor pricing
    - Identifies demand patterns and market opportunities
    - Analyzes external factors affecting demand (events, seasonality, etc.)
 
-2. **Demand Forecaster Agent** (Claude 3 Sonnet)
+2. **Demand Forecaster Agent** (tier 2 model)
    - Predicts future demand based on historical data
    - Identifies booking pace and patterns
    - Forecasts occupancy rates for different segments and room types
 
-3. **Pricing Strategist Agent** (Claude 3 Opus)
+3. **Pricing Strategist Agent** (tier 1 model)
    - Develops optimal pricing strategies based on market and demand insights
    - Recommends rate adjustments for different channels and segments
    - Identifies upselling and cross-selling opportunities
 
-4. **Revenue Manager Agent** (Claude 3 Sonnet)
+4. **Revenue Manager Agent** (tier 2 model)
    - Implements and monitors pricing changes
    - Evaluates performance against KPIs
    - Provides executive summaries and actionable recommendations
@@ -373,15 +373,17 @@ The Hotel Revenue Optimization System now features a clean provider-based archit
 - **Production Optimized**: Amazon Nova models as default for best speed/cost balance
 
 #### Latest Model Support
-- **Amazon Nova Models**: Premier, Pro, Lite, Micro (with inference profiles)
-- **Anthropic Claude Models**: 3.7 Sonnet (with prompt caching), 3.5 Haiku, 3 Haiku
-- **Hybrid Configuration**: Claude 3.7 for complex reasoning + Nova for speed
-- **Automatic Fallbacks**: Intelligent model fallback within provider tiers
+- **Amazon Nova Models**: Nova 2 Lite and Nova Micro, called through cross-region inference profiles
+- **Anthropic Claude Models**: Claude Sonnet 5.5 and Claude Haiku 5.5
+- **Hybrid Configuration**: Claude Sonnet 5.5 for complex reasoning + Nova for speed
+- **Automatic Fallbacks**: one retry on the provider's basic-tier model when a model call fails
+- **Keeping models current**: see [Updating models and AWS package versions](#updating-models-and-aws-package-versions)
 
-#### Performance Benchmarks (AWS Environment)
-- **HYBRID Provider**: 46.2 seconds (fastest - balanced performance)
-- **ANTHROPIC Provider**: 50.8 seconds (highest quality analysis)
-- **AMAZON Provider**: 51.8 seconds (cost-effective)
+#### Performance Benchmarks
+Measured on 2026-11-25 in us-east-1 with the sample prompt, running the crew locally (three runs at the same time):
+- **AMAZON Provider**: 70 to 115 seconds (cost-effective)
+- **HYBRID Provider**: about 175 seconds (balanced)
+- **ANTHROPIC Provider**: about 270 seconds (highest quality analysis)
 
 #### Production Deployment Status
 ✅ **Successfully deployed to AWS Bedrock AgentCore**
@@ -413,14 +415,18 @@ cd hotel_revenue_optimization
 
 ### 2. Install AgentCore CLI
 
-Download and install the AgentCore CLI:
+The `agentcore` CLI comes with the AWS-published `bedrock-agentcore-starter-toolkit` package, at the version
+pinned in `requirements.txt` (Python 3.10 or later):
 
 ```bash
-# Download AgentCore CLI (replace with actual download URL)
-curl -o agentcore https://agentcore-cli-download-url
-chmod +x agentcore
-sudo mv agentcore /usr/local/bin/
+python3 -m venv venv && source venv/bin/activate
+pip install -c requirements.txt bedrock-agentcore bedrock-agentcore-starter-toolkit
+agentcore --help
 ```
+
+Install AgentCore packages only by these names. `bedrock-agentcore-sdk`, `amazon-bedrock-agentcore` and
+`agentcore` are not AWS packages. If an earlier version of `build.sh` ran in your virtual environment, check with
+`pip list | grep -i agentcore`, and recreate the environment if any of those three appear.
 
 ### 3. Install dependencies
 
@@ -620,7 +626,7 @@ export AWS_PROFILE=your-profile
 python -m src.hotel_revenue_optimization.main
 ```
 
-The revenue optimization plan will be saved to the `output/revenue_optimization_plan.md` file.
+The revenue optimization plan is returned in the response and saved to `output/revenue_optimization_plan_<run id>.md`.
 
 ### Deployment Options
 
@@ -665,10 +671,10 @@ You have two options for running the Hotel Revenue Optimization System in a cont
      -e DISABLE_AUTH=true \
      -e AWS_REGION=us-west-2 \
      -e AWS_DEFAULT_REGION=us-west-2 \
-     -e MODEL_MARKET_ANALYST=bedrock/anthropic.claude-3-haiku-20240307-v1:0 \
-     -e MODEL_DEMAND_FORECASTER=bedrock/anthropic.claude-3-haiku-20240307-v1:0 \
-     -e MODEL_PRICING_STRATEGIST=bedrock/anthropic.claude-3-sonnet-20240229-v1:0 \
-     -e MODEL_REVENUE_MANAGER=bedrock/anthropic.claude-3-haiku-20240307-v1:0 \
+     -e MODEL_MARKET_ANALYST=bedrock/anthropic.claude-haiku-5-5 \
+     -e MODEL_DEMAND_FORECASTER=bedrock/anthropic.claude-haiku-5-5 \
+     -e MODEL_PRICING_STRATEGIST=bedrock/anthropic.claude-sonnet-5-5 \
+     -e MODEL_REVENUE_MANAGER=bedrock/anthropic.claude-haiku-5-5 \
      -e AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id --profile $AWS_PROFILE) \
      -e AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key --profile $AWS_PROFILE) \
      -e AWS_SESSION_TOKEN=$(aws configure get aws_session_token --profile $AWS_PROFILE 2>/dev/null) \
@@ -795,38 +801,130 @@ The system uses a provider-based tiered approach to model selection for optimal 
 #### Provider Options
 - **AMAZON** (default): Pure Amazon Nova models - fastest and most cost-effective
 - **ANTHROPIC**: Pure Anthropic Claude models - highest quality analysis
-- **HYBRID**: Best of both - Claude 3.7 for complex tasks, Nova for others
+- **HYBRID**: Best of both - Claude Sonnet 5.5 for complex tasks, Nova for others
 
 #### Model Tiers by Provider
 
 **AMAZON Provider (Default - Recommended for Production):**
-- **Tier 1**: Nova Premier - Complex reasoning (strategic pricing)
-- **Tier 2**: Nova Pro - Medium complexity (market analysis, forecasting)
-- **Tier 3**: Nova Lite - Simple tasks (data processing)
+- **Tier 1**: Nova 2 Lite - Complex reasoning (strategic pricing)
+- **Tier 2**: Nova 2 Lite - Medium complexity (market analysis, forecasting)
+- **Tier 3**: Nova 2 Lite - Simple tasks (data processing)
 - **Tier 4**: Nova Micro - Basic tasks (formatting)
 
 **ANTHROPIC Provider (Quality-Focused):**
-- **Tier 1**: Claude 3.7 Sonnet - Complex reasoning with prompt caching
-- **Tier 2**: Claude 3.7 Sonnet - Medium complexity with prompt caching
-- **Tier 3**: Claude 3.5 Haiku - Simple tasks
-- **Tier 4**: Claude 3 Haiku - Basic tasks
+- **Tier 1**: Claude Sonnet 5.5 - Complex reasoning
+- **Tier 2**: Claude Sonnet 5.5 - Medium complexity
+- **Tier 3**: Claude Haiku 5.5 - Simple tasks
+- **Tier 4**: Claude Haiku 5.5 - Basic tasks
 
 **HYBRID Provider (Balanced):**
-- **Tier 1**: Claude 3.7 Sonnet - Complex reasoning (pricing strategy)
-- **Tier 2**: Nova Pro - Medium complexity (analysis, forecasting)
-- **Tier 3**: Nova Lite - Simple tasks
+- **Tier 1**: Claude Sonnet 5.5 - Complex reasoning (pricing strategy)
+- **Tier 2**: Nova 2 Lite - Medium complexity (analysis, forecasting)
+- **Tier 3**: Nova 2 Lite - Simple tasks
 - **Tier 4**: Nova Micro - Basic tasks
+
+The model IDs are defined in one place, `src/hotel_revenue_optimization/utils/model_config.py`.
 
 #### Performance Comparison (AWS Environment)
 | Provider | Speed | Quality | Cost | Use Case |
 |----------|-------|---------|------|----------|
-| **HYBRID** | ⭐⭐⭐⭐⭐ (46.2s) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Balanced performance |
-| **ANTHROPIC** | ⭐⭐⭐⭐ (50.8s) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Maximum quality |
-| **AMAZON** | ⭐⭐⭐⭐ (51.8s) | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Cost-effective |
+| **AMAZON** | ⭐⭐⭐⭐⭐ (70-115s) | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Cost-effective |
+| **HYBRID** | ⭐⭐⭐⭐ (about 175s) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Balanced performance |
+| **ANTHROPIC** | ⭐⭐⭐ (about 270s) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Maximum quality |
 
 You can configure which provider each agent uses in the `.env` file.
 
 For more details, see the [Performance Monitoring README](src/hotel_revenue_optimization/utils/README.md).
+
+## Updating models and AWS package versions
+
+Amazon Bedrock retires model versions on a published schedule, and the AgentCore packages release often. A
+retired model fails with `ResourceNotFoundException: This model version has reached the end of its life`, and a
+crew built on it stops producing reports. Check the models and packages at least once a quarter, and whenever
+you see that error.
+
+### Update the models
+
+All model IDs are in `src/hotel_revenue_optimization/utils/model_config.py`: one table per provider
+(`AMAZON_TIERS`, `ANTHROPIC_TIERS`, `HYBRID_TIERS`), four tiers each.
+
+1. List the models that are active in your Region, and the inference profiles you can call:
+
+   ```bash
+   aws bedrock list-foundation-models --region us-east-1 \
+     --query "modelSummaries[?modelLifecycle.status=='ACTIVE'].[providerName,modelId]" --output table
+   aws bedrock list-inference-profiles --region us-east-1 \
+     --query "inferenceProfileSummaries[].inferenceProfileId" --output text | tr '\t' '\n' | sort
+   ```
+
+   `LEGACY` models still answer for accounts that use them, but are scheduled for end of life: move off them.
+   See [Model lifecycle](https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle.html).
+2. Pick the replacement in the same class (Sonnet for Sonnet, Haiku for Haiku, Nova Lite for Nova Lite) to keep
+   cost and latency close, and edit the table. Write the base model ID with the `bedrock/` prefix, for example
+   `bedrock/anthropic.claude-sonnet-5-5`: the crew calls it through the cross-region inference profile
+   `us.anthropic.claude-sonnet-5-5`.
+3. To try a model without editing code, set environment variables instead:
+
+   | Variable | Example | Effect |
+   |---|---|---|
+   | `MODEL_PROVIDER` | `ANTHROPIC` | Provider table to use: `AMAZON` (default), `ANTHROPIC` or `HYBRID` |
+   | `MODEL_TIER1` to `MODEL_TIER4` | `MODEL_TIER1=bedrock/anthropic.claude-opus-5-5` | Replace one tier of the active provider |
+   | `MODEL_<AGENT>` | `MODEL_PRICING_STRATEGIST=bedrock/anthropic.claude-opus-5-5` | Replace one agent's model |
+   | `<AGENT>_LLM_TIER` | `PRICING_STRATEGIST_LLM_TIER=tier2` | Move one agent to another tier |
+   | `BEDROCK_INFERENCE_PROFILE_PREFIX` | `eu` or `global` | Inference profile geography. `us` (default) keeps requests in US Regions; `global` can route them to any commercial Region. Choose it for your data residency needs, and check that a profile exists for every model you use |
+   | `BEDROCK_CLAUDE_EFFORT` | `medium` | Claude effort level: `low` (default), `medium` or `high`. Leave it empty for Claude models that reject the effort parameter (Claude Sonnet 4.5, Haiku 4.5 and earlier) |
+
+4. Check the request parameters when you change model generations. For example, Claude 5 models reject
+   `temperature` and `top_p` and reason before they answer by default, so `inference_config_for` and
+   `additional_fields_for` in `src/hotel_revenue_optimization/utils/nova_model_wrapper.py` send them only
+   `maxTokens` and an effort level. Read the provider's migration notes before you switch generations.
+5. Check that every configured model answers in your Region (exit code 1 if any model fails):
+
+   ```bash
+   python scripts/check_models.py
+   ```
+
+6. Run the crew once end to end (see [Running Locally](#running-locally)) and compare the report and the run
+   time with the previous models.
+7. If your AgentCore execution role limits `bedrock:InvokeModel` to specific models, add the new inference
+   profile ARN and the foundation model ARN in every Region the profile routes to. See
+   [Prerequisites for inference profiles](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-prereq.html).
+
+### Update the AWS packages (AgentCore SDK, starter toolkit, boto3)
+
+Install AWS packages only by the names AWS publishes them under: `bedrock-agentcore`,
+`bedrock-agentcore-starter-toolkit`, `boto3` and `aws-opentelemetry-distro`. Versions come from
+`requirements.txt`: `build.sh` and `deploy.sh` run
+`pip install -c requirements.txt bedrock-agentcore bedrock-agentcore-starter-toolkit` and stop if it fails. Never
+add a fallback to another package name: anyone can register a name AWS does not publish.
+
+1. Find the latest release, and check on PyPI that the project links to `github.com/aws` (for example
+   https://pypi.org/project/bedrock-agentcore-starter-toolkit/):
+
+   ```bash
+   pip index versions bedrock-agentcore-starter-toolkit
+   ```
+
+2. Change the pin in `requirements.txt` and in the `dev` extra of `pyproject.toml`, then run `uv lock` so
+   `uv.lock` matches.
+3. Check the pinned versions of both components for known vulnerabilities:
+
+   ```bash
+   pip install pip-audit
+   pip-audit -r requirements.txt
+   pip-audit -r ../hotel_revenue_optimization_ui/requirements.txt
+   ```
+
+4. Reinstall and check that the CLI still has the commands the scripts use:
+
+   ```bash
+   pip install --upgrade -c requirements.txt bedrock-agentcore bedrock-agentcore-starter-toolkit
+   agentcore configure --help && agentcore launch --help
+   ```
+
+   The sample is pinned to the 0.1 line of the starter toolkit, whose CLI matches `build.sh` and `deploy.sh`.
+   Starter toolkit 0.3 hides `launch` in favor of `deploy`, so update the scripts if you move to it.
+5. Run `python scripts/check_models.py` and the end-to-end test again.
 
 ## Sample Output
 
