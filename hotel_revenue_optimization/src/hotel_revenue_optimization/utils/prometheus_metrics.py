@@ -60,7 +60,7 @@ class PrometheusMetrics:
         )
         
         # AMP configuration
-        self.amp_workspace_id = os.environ.get('AMP_WORKSPACE_ID', 'ws-faa7717b-42ab-42f5-bcfa-d0ebd8bdc442')
+        self.amp_workspace_id = os.environ.get('AMP_WORKSPACE_ID', '')
         self.aws_region = os.environ.get('AWS_REGION', 'us-west-2')
         
         # Start metrics server

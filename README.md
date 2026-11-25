@@ -19,10 +19,10 @@ This system combines advanced AI agents with real-time market analysis to provid
 
 ### Core AI Agent System (`hotel_revenue_optimization/`)
 Multi-agent AI solution leveraging CrewAI and Amazon Bedrock AgentCore for revenue optimization:
-- **Version**: 2.1.0 - Production Ready
-- **Models**: Amazon Nova (Premier, Pro, Lite, Micro), Anthropic Claude (3.7 Sonnet, 3.5 Haiku, 3 Haiku)
+- **Version**: 2.1.1
+- **Models**: Amazon Nova (Nova 2 Lite, Nova Micro), Anthropic Claude (Sonnet 5.5, Haiku 5.5), all set in one file
 - **Provider Options**: AMAZON (default), ANTHROPIC, HYBRID
-- **Performance**: 46-52 seconds execution time (AWS environment)
+- **Performance**: about 70 to 270 seconds per report, depending on the provider
 - **Input Formats**: Natural language, structured JSON, prompt-based
 - **Deployment**: AWS Bedrock AgentCore with Docker containerization
 
@@ -64,6 +64,13 @@ flask run --debug
 ```
 
 For detailed setup and deployment instructions, see the README files in each component directory.
+
+## Keeping models and packages current
+
+Amazon Bedrock retires model versions, and the AgentCore packages release often. To check and update the models
+and the pinned AWS packages, follow [Updating models and AWS package versions](hotel_revenue_optimization/README.md#updating-models-and-aws-package-versions).
+In short: `python hotel_revenue_optimization/scripts/check_models.py` checks that every configured model answers,
+and AWS packages are installed only by the names AWS publishes them under, at the versions in `requirements.txt`.
 
 ## Security
 

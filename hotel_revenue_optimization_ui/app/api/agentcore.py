@@ -40,7 +40,10 @@ def invoke_agentcore(payload, session_id=None):
     # Get the AgentCore runtime ARN from the app config
     agent_runtime_arn = current_app.config.get('AGENTCORE_RUNTIME_ARN')
     if not agent_runtime_arn:
-        raise Exception("AGENTCORE_RUNTIME_ARN not configured")
+        raise RuntimeError(
+            "AGENTCORE_RUNTIME_ARN is not set. Set it to the ARN of your Amazon Bedrock AgentCore runtime, "
+            "for example arn:aws:bedrock-agentcore:us-west-2:123456789012:runtime/agent-name-xyz"
+        )
     
     # Extract query type
     query_type = payload.get("query_type", "unknown")
@@ -56,8 +59,8 @@ def invoke_agentcore(payload, session_id=None):
     
     # Get timeout configurations
     connect_timeout = current_app.config.get('AWS_CONNECT_TIMEOUT', 10)
-    read_timeout = current_app.config.get('AWS_READ_TIMEOUT', 120)
-    agentcore_timeout = current_app.config.get('AGENTCORE_TIMEOUT', 120)
+    read_timeout = current_app.config.get('AWS_READ_TIMEOUT', 360)
+    agentcore_timeout = current_app.config.get('AGENTCORE_TIMEOUT', 360)
     
     logger.info(f"Timeout settings - Connect: {connect_timeout}s, Read: {read_timeout}s, AgentCore: {agentcore_timeout}s")
     

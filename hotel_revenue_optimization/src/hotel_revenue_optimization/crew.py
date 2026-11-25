@@ -39,6 +39,8 @@ class HotelRevenueOptimizationCrew:
     def __init__(self):
         """Initialize the crew with performance tracking"""
         self.run_id = str(uuid.uuid4())
+        # One report file per run, so a run never returns another run's report
+        self.report_path = os.path.join("output", f"revenue_optimization_plan_{self.run_id}.md")
         self.start_time = time.time()
         self.model_wrappers = {}
         self.crew_name = "HotelRevenueOptimizationCrew"
@@ -257,10 +259,10 @@ class HotelRevenueOptimizationCrew:
             description=self.tasks_config['revenue_management_task']['description'],
             agent=self.revenue_manager(),
             expected_output="Complete revenue optimization plan in markdown format",
-            output_file='output/revenue_optimization_plan.md'
+            output_file=self.report_path
         )
 
-    def crew(self) -> Crew:
+    def crew(self, planning: bool = True) -> Crew:
         """Creates the optimized Hotel Revenue Optimization crew"""
         observability.log_event(
             event_type="CREW_START",
@@ -307,8 +309,7 @@ class HotelRevenueOptimizationCrew:
             crew_name=self.crew_name,
             details={
                 "planning_enabled": True,
-                "planning_model": planning_model,
-                "embedder_model": "amazon.titan-embed-text-v1"
+                "planning_model": planning_model
             }
         )
         
@@ -321,15 +322,10 @@ class HotelRevenueOptimizationCrew:
             max_execution_time=45,
             memory=False,
             callbacks=[self._task_callback],
-            planning=True,
+            planning=planning,
             planning_llm=planning_llm,  # Use our Bedrock model for planning
-            embedder={
-                "provider": "aws_bedrock",
-                "config": {
-                    "model": "amazon.titan-embed-text-v1",
-                    "region": os.environ.get('AWS_REGION', 'us-east-1')
-                }
-            }
+            # Memory is off, so no embedder is configured. To turn memory on with CrewAI 0.203, add
+            # embedder={"provider": "amazon-bedrock", "config": {"model_name": "amazon.titan-embed-text-v2:0"}}
         )
         
         return crew_instance
@@ -414,7 +410,24 @@ class HotelRevenueOptimizationCrew:
             
             # Track task execution with timing fallback
             task_start_time = time.time()
-            result = crew_instance.kickoff(inputs=inputs)
+            try:
+                result = crew_instance.kickoff(inputs=inputs)
+            except Exception as kickoff_error:
+                # CrewAI's planning step turns the planner's text into a Pydantic model, and CrewAI 0.203 fails
+                # the whole run when that text is not valid JSON. If no task has finished yet, run once more
+                # without planning rather than return no report.
+                if self.task_times:
+                    raise
+                observability.log_event(
+                    event_type="PLANNING_FALLBACK",
+                    agent_name="system",
+                    model_name=planning_model,
+                    crew_name=self.crew_name,
+                    details={"error": f"{type(kickoff_error).__name__}: {kickoff_error}"[:500],
+                             "action": "rerun without planning"}
+                )
+                crew_instance = self.crew(planning=False)
+                result = crew_instance.kickoff(inputs=inputs)
             task_end_time = time.time()
             
             # If callback didn't populate task_times, create fallback timing

@@ -181,8 +181,8 @@
             "revenue_management_task": 25.3
           },
           "model_latencies": {
-            "anthropic.claude-3-haiku-20240307-v1:0": 2.3,
-            "anthropic.claude-3-sonnet-20240229-v1:0": 3.1
+            "anthropic.claude-haiku-5-5": 2.3,
+            "anthropic.claude-sonnet-5-5": 3.1
           }
         }
       },
@@ -205,7 +205,7 @@
           "error_details": {
             "error_code": "ThrottlingException",
             "retry_attempts": 5,
-            "model_id": "anthropic.claude-3-sonnet-20240229-v1:0"
+            "model_id": "anthropic.claude-sonnet-5-5"
           }
         },
         "revenue_management_task": {
@@ -235,8 +235,8 @@
             "pricing_strategy_task": 15.2
           },
           "model_latencies": {
-            "anthropic.claude-3-haiku-20240307-v1:0": 2.5,
-            "anthropic.claude-3-sonnet-20240229-v1:0": 3.3
+            "anthropic.claude-haiku-5-5": 2.5,
+            "anthropic.claude-sonnet-5-5": 3.3
           }
         }
       }

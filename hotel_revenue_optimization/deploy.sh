@@ -75,13 +75,13 @@ if [ ! -d "venv" ]; then
 fi
 source venv/bin/activate
 
-# Upgrade AgentCore SDK to latest version
-echo "Upgrading AgentCore SDK to latest version..."
-pip install --upgrade bedrock-agentcore bedrock-agentcore-starter-toolkit || {
-    echo "Warning: Could not upgrade bedrock-agentcore packages (may not be available)"
-    echo "Installing agentcore..."
-    pip install --upgrade agentcore
-}
+# Install the AgentCore SDK and starter toolkit at the versions requirements.txt allows.
+# Never fall back to other package names: anyone can register a name AWS does not publish.
+echo "Installing the AgentCore SDK and starter toolkit (versions from requirements.txt)..."
+if ! pip install --upgrade -c requirements.txt bedrock-agentcore bedrock-agentcore-starter-toolkit; then
+    echo "❌ Could not install bedrock-agentcore and bedrock-agentcore-starter-toolkit (they need Python 3.10 or later)."
+    exit 1
+fi
 
 # Use existing AgentCore configuration or create new one
 if [ -f ".bedrock_agentcore.yaml" ] && [ "$FORCE_REBUILD" = false ]; then
@@ -142,7 +142,7 @@ COPY requirements.txt requirements.txt
 # Install from requirements file
 RUN uv pip install -r requirements.txt
 
-RUN uv pip install aws-opentelemetry-distro>=0.10.1
+RUN uv pip install "aws-opentelemetry-distro>=0.24.0"
 
 # Set AWS region environment variable
 ENV AWS_REGION=us-east-1
@@ -150,6 +150,10 @@ ENV AWS_DEFAULT_REGION=us-east-1
 
 # Signal that this is running in Docker for host binding logic
 ENV DOCKER_CONTAINER=1
+
+# The CrewAI instrumentation in aws-opentelemetry-distro 0.24 expects CrewAI 1.x events and fails every
+# CrewAI 0.x run; Bedrock calls are still traced through botocore
+ENV OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=aws_crewai
 
 # Create non-root user
 RUN useradd -m -u 1000 bedrock_agentcore

@@ -70,12 +70,12 @@ All logs are output to the console in JSON format for easy parsing:
 {
   "timestamp": "2025-07-21T02:15:30.123456Z",
   "level": "INFO",
-  "message": "MODEL_INVOKE STARTED | Agent: pricing_strategist | Model: anthropic.claude-3-sonnet-20240229-v1:0",
+  "message": "MODEL_INVOKE STARTED | Agent: pricing_strategist | Model: anthropic.claude-sonnet-5-5",
   "logger": "HotelRevenueOptimization",
   "event_type": "MODEL_INVOKE",
   "status": "started",
   "agent": "pricing_strategist",
-  "model": "anthropic.claude-3-sonnet-20240229-v1:0",
+  "model": "anthropic.claude-sonnet-5-5",
   "operation_id": "550e8400-e29b-41d4-a716-446655440001",
   "task": "pricing_strategy_task",
   "crew": "HotelRevenueOptimizationCrew",
@@ -83,7 +83,7 @@ All logs are output to the console in JSON format for easy parsing:
   "system_prompt_length": 256,
   "temperature": 0.7,
   "max_tokens": 4096,
-  "model_id": "anthropic.claude-3-sonnet-20240229-v1:0",
+  "model_id": "anthropic.claude-sonnet-5-5",
   "fallback_attempts": 0
 }
 ```
@@ -161,7 +161,7 @@ When some tasks fail but others complete successfully, the system returns a resp
       "error_details": {
         "error_code": "ThrottlingException",
         "retry_attempts": 5,
-        "model_id": "anthropic.claude-3-sonnet-20240229-v1:0"
+        "model_id": "anthropic.claude-sonnet-5-5"
       }
     },
     "revenue_management_task": {
@@ -184,8 +184,8 @@ When some tasks fail but others complete successfully, the system returns a resp
         "pricing_strategy_task": 15.2
       },
       "model_latencies": {
-        "anthropic.claude-3-haiku-20240307-v1:0": 2.5,
-        "anthropic.claude-3-sonnet-20240229-v1:0": 3.3
+        "anthropic.claude-haiku-5-5": 2.5,
+        "anthropic.claude-sonnet-5-5": 3.3
       }
     }
   },

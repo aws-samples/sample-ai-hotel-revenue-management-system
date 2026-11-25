@@ -15,6 +15,23 @@ from src.hotel_revenue_optimization import HotelRevenueOptimizationCrew, observa
 
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
+# CrewAI 0.203 asks first-time users whether to view execution traces and waits 20 seconds for an answer.
+# Every new runtime session is a first run, so mark it done to keep requests from waiting on that prompt.
+try:
+    from crewai.events.listeners.tracing.utils import mark_first_execution_done
+    mark_first_execution_done()
+except Exception:  # older or newer CrewAI without this helper
+    pass
+
+# The CrewAI instrumentation in aws-opentelemetry-distro 0.24 expects CrewAI 1.x events and fails every CrewAI 0.x
+# run. The Dockerfiles turn it off with OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=aws_crewai; turning it off here too
+# covers images built from any other Dockerfile, such as the one agentcore configure writes.
+try:
+    from amazon.opentelemetry.distro.instrumentation.crewai import CrewAIInstrumentor
+    CrewAIInstrumentor().uninstrument()
+except Exception:  # ADOT not installed, or a version without this instrumentation
+    pass
+
 app = BedrockAgentCoreApp()
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
@@ -349,10 +366,10 @@ def run(payload=None):
                 "error": str(e)
             }
         
-        # Try to read the report file
+        # Read this run's report file (only when the crew finished)
         report_content = None
-        report_path = "output/revenue_optimization_plan.md"
-        if os.path.exists(report_path):
+        report_path = crew.report_path
+        if status == "success" and os.path.exists(report_path):
             with open(report_path, "r") as f:
                 report_content = f.read()
         

@@ -342,5 +342,5 @@ class BedrockModelWrapper:
             # If we're already at the lowest tier, use the most efficient model
             return MODEL_TIERS["tier4"][-1]  # Last model in tier4 (most efficient)
         
-        # Default emergency fallback
-        return "bedrock/amazon.titan-text-express-v1"
+        # Default emergency fallback: the active provider's basic-tier model
+        return MODEL_TIERS["tier4"][0]

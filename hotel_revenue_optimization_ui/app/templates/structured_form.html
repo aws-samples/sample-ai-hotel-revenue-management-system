@@ -633,9 +633,11 @@ function showError(message) {
     resultsContent.innerHTML = `
         <div class="alert alert-danger">
             <i class="bi bi-exclamation-triangle"></i>
-            <strong>Error:</strong> ${message}
+            <strong>Error:</strong> <span class="error-message"></span>
         </div>
     `;
+    // The message can carry server or agent text: insert it as text, never as HTML
+    resultsContent.querySelector('.error-message').textContent = message;
 }
 
     function printResults() {

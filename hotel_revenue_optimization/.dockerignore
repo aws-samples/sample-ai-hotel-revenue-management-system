@@ -1,0 +1,11 @@
+# Keep local secrets, environments and run output out of the image
+.env
+.env.*
+venv/
+.venv/
+__pycache__/
+*.pyc
+output/
+logs/
+backup/
+.git

@@ -4,7 +4,7 @@ This document explains the AgentCore permissions configuration for the Hotel Rev
 
 ## Background
 
-Amazon Bedrock AgentCore uses a different service prefix (`bedrock-agentcore:*`) than regular Bedrock services (`bedrock:*`). The AWS managed policy `AmazonBedrockFullAccess` only covers `bedrock:*` actions, so specific AgentCore permissions must be added separately.
+Amazon Bedrock AgentCore uses a different service prefix (`bedrock-agentcore:*`) than regular Bedrock services (`bedrock:*`). The UI calls only `bedrock-agentcore:InvokeAgentRuntime`, so the task role grants that action on your runtime and no Bedrock managed policy.
 
 ## Required Permissions
 
@@ -16,17 +16,17 @@ The ECS task role needs these specific permissions:
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": [
-        "bedrock-agentcore:InvokeAgentRuntime",
-        "bedrock-agentcore:GetAgentRuntime"
-      ],
-      "Resource": "arn:aws:bedrock-agentcore:REGION:ACCOUNT:runtime/AGENT_NAME*"
+      "Action": "bedrock-agentcore:InvokeAgentRuntime",
+      "Resource": [
+        "arn:aws:bedrock-agentcore:REGION:ACCOUNT:runtime/AGENT_ID",
+        "arn:aws:bedrock-agentcore:REGION:ACCOUNT:runtime/AGENT_ID/*"
+      ]
     }
   ]
 }
 ```
 
-**Important**: The wildcard (`*`) at the end of the resource ARN is crucial because AgentCore creates sub-resources like `/runtime-endpoint/DEFAULT`.
+**Important**: AgentCore authorizes `InvokeAgentRuntime` on both the runtime and the endpoint being invoked, such as `/runtime-endpoint/DEFAULT`, so the policy lists the runtime ARN and `<runtime ARN>/*`.
 
 ## CloudFormation Implementation
 
@@ -37,18 +37,18 @@ ECSTaskRole:
   Type: AWS::IAM::Role
   Properties:
     # ... other properties
-    ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
     Policies:
       - PolicyName: AgentCoreInvokePolicy
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
-            - Effect: Allow
-              Action:
-                - bedrock-agentcore:InvokeAgentRuntime
-                - bedrock-agentcore:GetAgentRuntime
-              Resource: !Sub '${AgentCoreEndpoint}*'
+            - Sid: InvokeAgentRuntime
+              Effect: Allow
+              Action: bedrock-agentcore:InvokeAgentRuntime
+              Resource:
+                - !Ref AgentCoreEndpoint
+                - !Sub '${AgentCoreEndpoint}/*'
+            # ... plus the DynamoDB history table and, if SenderEmail is set, ses:SendEmail from that address
 ```
 
 ## Symptoms of Missing Permissions
@@ -115,7 +115,7 @@ If you've updated the CloudFormation template but permissions still don't work:
 1. **Check task definition revision**: Ensure the ECS service is using the latest task definition
 2. **Restart tasks**: Force a new deployment to pick up IAM changes
 3. **Verify resource ARN**: Ensure the AgentCore ARN in the policy matches exactly
-4. **Check wildcard**: Confirm the resource ARN ends with `*`
+4. **Check the endpoint ARN**: Confirm the policy also allows `<runtime ARN>/*`
 
 ### Policy Updates Not Taking Effect
 
@@ -127,7 +127,7 @@ IAM policy changes can take a few minutes to propagate:
 
 ## Best Practices
 
-1. **Always include wildcard**: AgentCore resource ARNs should end with `*`
+1. **Include the endpoints**: Grant the runtime ARN and `<runtime ARN>/*`, not a prefix wildcard that matches other runtimes
 2. **Use least privilege**: Only grant permissions to the specific AgentCore runtime
 3. **Validate after deployment**: Run the validation script after each deployment
 4. **Monitor logs**: Watch for AccessDeniedException errors in CloudWatch

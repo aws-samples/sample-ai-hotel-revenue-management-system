@@ -84,8 +84,8 @@ OTEL_SDK_DISABLED=true  # Set to false to enable OpenTelemetry
 # Run in development mode
 flask run --debug
 
-# Or run with specific host and port
-flask run --debug --host=0.0.0.0 --port=5000
+# Or run with a specific port (keep the host on 127.0.0.1: the debugger runs code for anyone who can reach it)
+flask run --debug --host=127.0.0.1 --port=5000
 ```
 
 The application will be available at http://localhost:5000

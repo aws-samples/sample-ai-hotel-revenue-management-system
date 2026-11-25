@@ -134,10 +134,10 @@ agentcore configure \
 Create a `.env` file with the following variables:
 
 ```bash
-MODEL_MARKET_ANALYST=bedrock/anthropic.claude-3-haiku-20240307-v1:0
-MODEL_DEMAND_FORECASTER=bedrock/anthropic.claude-3-haiku-20240307-v1:0
-MODEL_PRICING_STRATEGIST=bedrock/anthropic.claude-3-sonnet-20240229-v1:0
-MODEL_REVENUE_MANAGER=bedrock/anthropic.claude-3-haiku-20240307-v1:0
+MODEL_MARKET_ANALYST=bedrock/anthropic.claude-haiku-5-5
+MODEL_DEMAND_FORECASTER=bedrock/anthropic.claude-haiku-5-5
+MODEL_PRICING_STRATEGIST=bedrock/anthropic.claude-sonnet-5-5
+MODEL_REVENUE_MANAGER=bedrock/anthropic.claude-haiku-5-5
 AWS_REGION=us-east-1
 ```
 

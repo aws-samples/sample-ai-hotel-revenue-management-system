@@ -6,7 +6,8 @@ from typing import Dict, List, Optional
 
 class QueryHistoryService:
     def __init__(self):
-        self.dynamodb = boto3.resource('dynamodb')
+        # Same Region as the rest of the app (AWS_REGION), falling back to the SDK's default chain
+        self.dynamodb = boto3.resource('dynamodb', region_name=os.environ.get('AWS_REGION') or None)
         self.table_name = os.environ.get('HISTORY_TABLE_NAME')
         if self.table_name:
             self.table = self.dynamodb.Table(self.table_name)
