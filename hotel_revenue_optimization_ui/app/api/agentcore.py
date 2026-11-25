@@ -40,7 +40,10 @@ def invoke_agentcore(payload, session_id=None):
     # Get the AgentCore runtime ARN from the app config
     agent_runtime_arn = current_app.config.get('AGENTCORE_RUNTIME_ARN')
     if not agent_runtime_arn:
-        raise Exception("AGENTCORE_RUNTIME_ARN not configured")
+        raise RuntimeError(
+            "AGENTCORE_RUNTIME_ARN is not set. Set it to the ARN of your Amazon Bedrock AgentCore runtime, "
+            "for example arn:aws:bedrock-agentcore:us-west-2:123456789012:runtime/agent-name-xyz"
+        )
     
     # Extract query type
     query_type = payload.get("query_type", "unknown")

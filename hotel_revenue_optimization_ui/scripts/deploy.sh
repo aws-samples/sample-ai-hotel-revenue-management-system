@@ -12,6 +12,7 @@ STACK_PREFIX="hotel-revenue-optimization"
 SKIP_BUILD=false
 FORCE_DEPLOY=false
 AGENTCORE_RUNTIME_ARN=""
+SENDER_EMAIL=""
 
 # Colors for output
 RED='\033[0;31m'
@@ -47,6 +48,7 @@ Options:
   --env ENV                   Environment (dev, test, prod). Default: dev
   --region REGION             AWS region. Default: from AWS CLI config or us-west-2
   --agentcore-arn ARN         AgentCore runtime ARN. If not provided, will try to read from .env
+  --sender-email ADDRESS      Sender address verified in Amazon SES, to turn on email reports (optional)
   --skip-build                Skip Docker image build and push
   --force                     Skip confirmation prompts
   --help                      Show this help message
@@ -73,6 +75,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --agentcore-arn)
       AGENTCORE_RUNTIME_ARN="$2"
+      shift 2
+      ;;
+    --sender-email)
+      SENDER_EMAIL="$2"
       shift 2
       ;;
     --skip-build)
@@ -284,6 +290,12 @@ log_success "Cognito secret stack deployed successfully"
 
 log_success "Using AgentCore runtime ARN: ${AGENTCORE_RUNTIME_ARN}"
 
+# Optional parameters: when one is not given, an update keeps the value the stack already has
+ECS_OPTIONAL_PARAMS=()
+if [ -n "$SENDER_EMAIL" ]; then
+    ECS_OPTIONAL_PARAMS+=("SenderEmail=${SENDER_EMAIL}")
+fi
+
 # Deploy ECS stack
 log_info "Deploying ECS application stack (with 20-minute timeout)..."
 aws cloudformation deploy \
@@ -300,6 +312,7 @@ aws cloudformation deploy \
     CognitoClientId=${CLIENT_ID} \
     CognitoDomain=${DOMAIN} \
     AgentCoreEndpoint=${AGENTCORE_RUNTIME_ARN} \
+    "${ECS_OPTIONAL_PARAMS[@]}" \
   --capabilities CAPABILITY_IAM \
   --region ${AWS_REGION} || {
     log_error "ECS stack deployment failed"

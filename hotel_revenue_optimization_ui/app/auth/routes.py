@@ -1,8 +1,18 @@
 from flask import render_template, redirect, url_for, request, session, current_app, jsonify
 from app.auth import bp
-from app.auth.cognito import get_cognito_login_url, get_cognito_logout_url
+from app.auth.cognito import (get_cognito_login_url, get_cognito_logout_url, cognito_base_url,
+                              establish_session, safe_redirect_target)
+from app.auth.tokens import TokenVerificationError, verify_id_token
+import base64
+import hashlib
+import hmac
 import logging
+import secrets
 import time
+import requests
+
+# Seconds to wait for the Cognito token endpoint
+TOKEN_REQUEST_TIMEOUT = 10
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -16,9 +26,31 @@ if not logger.handlers:
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
+def _redirect_uri():
+    """The OAuth redirect URI. The authorize request and the token request must send the same value."""
+    if current_app.config.get('AUTH_REDIRECT_URI'):
+        # Use the configured redirect URI
+        return current_app.config.get('AUTH_REDIRECT_URI')
+    if current_app.config.get('CLOUDFRONT_DOMAIN'):
+        # Use CloudFront domain for production
+        return f"https://{current_app.config['CLOUDFRONT_DOMAIN']}/auth/callback"
+    # Use local domain for development
+    return url_for('auth.callback', _external=True)
+
+def _pkce_challenge(code_verifier):
+    """S256 code challenge (RFC 7636): base64url of the SHA-256 of the verifier, without padding."""
+    digest = hashlib.sha256(code_verifier.encode('ascii')).digest()
+    return base64.urlsafe_b64encode(digest).rstrip(b'=').decode('ascii')
+
+def _auth_error(description, status):
+    return render_template('auth/error.html', error="Authentication Error",
+                           error_description=description), status
+
 @bp.route('/login')
 def login():
     """Login page"""
+    next_url = safe_redirect_target(request.args.get('next'))
+
     # Check if authentication is disabled for local development
     if current_app.config.get('DISABLE_AUTH', False):
         logger.info("Authentication is disabled for local development")
@@ -26,203 +58,132 @@ def login():
         session['user'] = {
             'sub': 'local-development-user',
             'email': 'dev@example.com',
+            'email_verified': False,
             'name': 'Local Developer'
         }
-        next_url = request.args.get('next', url_for('main.index'))
         return redirect(next_url)
     
     # Check if user is already logged in
-    if 'user' in session:
-        next_url = request.args.get('next', url_for('main.index'))
+    if session.get('user') and (session.get('token_expiration') or 0) > time.time():
         return redirect(next_url)
     
-    # Get the redirect URI
-    if current_app.config.get('AUTH_REDIRECT_URI'):
-        # Use the configured redirect URI
-        redirect_uri = current_app.config.get('AUTH_REDIRECT_URI')
-        logger.info(f"Using configured redirect URI: {redirect_uri}")
-    elif current_app.config.get('CLOUDFRONT_DOMAIN'):
-        # Use CloudFront domain for production
-        redirect_uri = f"https://{current_app.config['CLOUDFRONT_DOMAIN']}/auth/callback"
-        logger.info(f"Using CloudFront redirect URI: {redirect_uri}")
-    else:
-        # Use local domain for development
-        redirect_uri = url_for('auth.callback', _external=True)
-        logger.info(f"Using local redirect URI: {redirect_uri}")
+    # A fresh random state and PKCE verifier for every sign-in, kept in the signed session cookie.
+    # The callback accepts an authorization code only together with this state, and redeems it with
+    # this verifier, so a code started in another browser cannot sign this browser in.
+    state = secrets.token_urlsafe(32)
+    code_verifier = secrets.token_urlsafe(64)
+    session['oauth_state'] = state
+    session['pkce_verifier'] = code_verifier
+    session['post_login_next'] = next_url
     
     # Get the Cognito login URL
-    login_url = get_cognito_login_url(redirect_uri)
+    login_url = get_cognito_login_url(_redirect_uri(), state=state, code_challenge=_pkce_challenge(code_verifier))
     
     return render_template('auth/login.html', login_url=login_url)
 
 @bp.route('/callback')
 def callback():
     """Callback endpoint for Cognito authentication"""
-    # Check if this is a code flow callback
-    code = request.args.get('code')
-    if code:
-        logger.info("Received authorization code from Cognito")
-        # Log all request parameters for debugging
-        logger.info(f"Request args: {request.args}")
-        
-        try:
-            # Exchange the code for tokens
-            token_endpoint = f"https://{current_app.config['COGNITO_DOMAIN']}/oauth2/token"
-            client_id = current_app.config.get('COGNITO_CLIENT_ID') or current_app.config.get('COGNITO_APP_CLIENT_ID')
-            client_secret = current_app.config.get('COGNITO_CLIENT_SECRET', '5lvq8u7vsulcnp6l5pfquitf3ta9gkc74ghu9414972cgjnijq3')
-            
-            if current_app.config.get('AUTH_REDIRECT_URI'):
-                redirect_uri = current_app.config.get('AUTH_REDIRECT_URI')
-            elif current_app.config.get('CLOUDFRONT_DOMAIN'):
-                redirect_uri = f"https://{current_app.config['CLOUDFRONT_DOMAIN']}/auth/callback"
-            else:
-                redirect_uri = url_for('auth.callback', _external=True)
-            
-            logger.info(f"Token endpoint: {token_endpoint}")
-            logger.info(f"Client ID: {client_id}")
-            logger.info(f"Redirect URI: {redirect_uri}")
-            
-            import requests
-            import base64
-            
-            # Create the Authorization header with Basic auth using client_id and client_secret
-            auth_header = base64.b64encode(f"{client_id}:{client_secret}".encode('utf-8')).decode('utf-8')
-            
-            # Debug logging
-            logger.info(f"Client Secret (first 10 chars): {client_secret[:10]}...")
-            logger.info(f"Auth header: Basic {auth_header}")
-            
-            token_response = requests.post(
-                token_endpoint,
-                data={
-                    'grant_type': 'authorization_code',
-                    'code': code,
-                    'redirect_uri': redirect_uri
-                },
-                headers={
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': f'Basic {auth_header}'
-                }
-            )
-            
-            if token_response.status_code == 200:
-                tokens = token_response.json()
-                id_token = tokens.get('id_token')
-                access_token = tokens.get('access_token')
-                
-                # Get user info from the ID token
-                import jwt
-                import base64
-                import json
-                
-                # Parse the ID token payload
-                id_token_parts = id_token.split('.')
-                if len(id_token_parts) >= 2:
-                    # Fix padding for base64 decoding
-                    payload = id_token_parts[1]
-                    payload += '=' * (4 - len(payload) % 4) if len(payload) % 4 != 0 else ''
-                    
-                    try:
-                        decoded_payload = base64.b64decode(payload)
-                        user_info = json.loads(decoded_payload)
-                        
-                        # Log user info for debugging (excluding sensitive data)
-                        logger.info(f"User info from token: email={user_info.get('email')}, name={user_info.get('name')}, given_name={user_info.get('given_name')}, family_name={user_info.get('family_name')}")
-                        
-                        # Store user info in session
-                        session.permanent = True
-                        session['user'] = {
-                            'sub': user_info.get('sub', 'unknown'),
-                            'email': user_info.get('email', 'unknown@example.com'),
-                            'name': user_info.get('name', user_info.get('email', 'User')),
-                            'given_name': user_info.get('given_name', ''),
-                            'family_name': user_info.get('family_name', '')
-                        }
-                        
-                        # Store tokens in session
-                        session['id_token'] = id_token
-                        session['access_token'] = access_token
-                        
-                        # Set token expiration (1 hour from now or use exp from token)
-                        if 'exp' in user_info:
-                            session['token_expiration'] = user_info['exp']
-                        else:
-                            session['token_expiration'] = int(time.time()) + (24 * 60 * 60)
-                        
-                        logger.info(f"User added to session: {session['user'].get('email')}")
-                        logger.info(f"Token expiration: {session.get('token_expiration')}")
-                        
-                    except Exception as e:
-                        logger.error(f"Error decoding ID token: {e}")
-                        # Return error instead of using hardcoded values
-                        return render_template('auth/error.html', 
-                                              error="Authentication Error", 
-                                              error_description="Failed to decode user information from token. Please try again or contact support.")
-                else:
-                    logger.error("Invalid ID token format")
-                    # Return error instead of using hardcoded values
-                    return render_template('auth/error.html', 
-                                          error="Authentication Error", 
-                                          error_description="Invalid token format received. Please try again or contact support.")
-            else:
-                logger.error(f"Error exchanging code for tokens: {token_response.status_code} {token_response.text}")
-                # Return error instead of using hardcoded values
-                return render_template('auth/error.html', 
-                                      error="Authentication Error", 
-                                      error_description=f"Failed to authenticate with Cognito. Error: {token_response.text}")
-                
-        except Exception as e:
-            logger.error(f"Error in token exchange: {e}")
-            # Return error instead of using hardcoded values
-            return render_template('auth/error.html', 
-                                  error="Authentication Error", 
-                                  error_description="An unexpected error occurred during authentication. Please try again or contact support.")
-        
-        # Set a session cookie that will work with CloudFront
-        response = redirect(url_for('main.index'))
-        return response
-    
+    # The state and verifier are single use, whatever the outcome
+    expected_state = session.pop('oauth_state', None)
+    code_verifier = session.pop('pkce_verifier', None)
+    next_url = safe_redirect_target(session.pop('post_login_next', None))
+
     # If there's an error parameter, log it
     error = request.args.get('error')
     if error:
         logger.error(f"Error in Cognito callback: {error}")
-        logger.error(f"Error description: {request.args.get('error_description')}")
         return render_template('auth/error.html', error=error, error_description=request.args.get('error_description'))
-    
-    # This endpoint is used for the implicit grant flow
-    # The tokens are returned in the URL fragment, which is processed by JavaScript
-    return render_template('auth/callback.html', next_url=url_for('main.index'))
+
+    code = request.args.get('code')
+    if not code:
+        # This endpoint is used for the implicit grant flow
+        # The tokens are returned in the URL fragment, which is processed by JavaScript
+        return render_template('auth/callback.html', next_url=url_for('main.index'))
+
+    received_state = request.args.get('state') or ''
+    if not expected_state or not code_verifier or not hmac.compare_digest(
+            received_state.encode('utf-8'), expected_state.encode('utf-8')):
+        logger.warning("Rejected an authorization code whose state does not match this browser's sign-in")
+        return _auth_error("The sign-in request could not be verified. Please sign in again.", 400)
+
+    # Exchange the code for tokens
+    client_id = current_app.config.get('COGNITO_CLIENT_ID') or current_app.config.get('COGNITO_APP_CLIENT_ID')
+    client_secret = current_app.config.get('COGNITO_CLIENT_SECRET')
+    cognito_domain = cognito_base_url()
+    if not cognito_domain or not client_id:
+        logger.error("Cognito is not configured properly")
+        return _auth_error("Sign-in is not configured. Please contact support.", 500)
+
+    token_request = {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': _redirect_uri(),
+        'code_verifier': code_verifier
+    }
+    if client_secret:
+        # Confidential app client: requests sends client_id:client_secret as HTTP Basic authentication
+        client_auth = (client_id, client_secret)
+    else:
+        # Public app client without a secret: PKCE alone binds the code to this browser
+        client_auth = None
+        token_request['client_id'] = client_id
+
+    try:
+        token_response = requests.post(
+            f"{cognito_domain}/oauth2/token",
+            data=token_request,
+            auth=client_auth,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            timeout=TOKEN_REQUEST_TIMEOUT
+        )
+    except requests.RequestException as e:
+        logger.error(f"Token request to Cognito failed: {e.__class__.__name__}")
+        return _auth_error("An unexpected error occurred during authentication. Please try again or contact support.", 502)
+
+    try:
+        tokens = token_response.json()
+    except ValueError:
+        tokens = {}
+    if not isinstance(tokens, dict):
+        tokens = {}
+    if token_response.status_code != 200:
+        # Log the OAuth error code only (for example invalid_grant), never the request
+        logger.error(f"Error exchanging code for tokens: HTTP {token_response.status_code} {tokens.get('error', '')}")
+        return _auth_error("Failed to authenticate with Cognito. Please sign in again.", 401)
+
+    # The ID token arrives over TLS from Cognito, but it is still verified before it is trusted
+    try:
+        claims = verify_id_token(tokens.get('id_token'))
+    except TokenVerificationError as e:
+        logger.error(f"Rejected the ID token from the Cognito token endpoint: {e}")
+        return _auth_error("Failed to verify the sign-in. Please try again or contact support.", 401)
+
+    establish_session(claims)
+    logger.info(f"User signed in: sub={claims['sub']}")
+    return redirect(next_url)
 
 @bp.route('/process-token', methods=['POST'])
 def process_token():
-    """Process the token received from Cognito"""
-    data = request.get_json()
+    """Sign in with an ID token posted by the implicit-flow page (templates/auth/callback.html).
+
+    The token must pass the same verification as in the code flow. The identity and the expiry come
+    from its verified claims; anything else in the request body (sub, email, name, expires_at, tokens)
+    is ignored.
+    """
+    data = request.get_json(silent=True)
     
-    if not data or 'id_token' not in data:
+    if not isinstance(data, dict) or not data.get('id_token'):
         return jsonify({'error': 'Invalid request'}), 400
-    
-    # Make the session permanent
-    session.permanent = True
-    
-    # Store the tokens in the session
-    session['id_token'] = data['id_token']
-    session['access_token'] = data.get('access_token')
-    
-    # Set token expiration (24 hours from now if not provided)
-    if data.get('expires_at'):
-        session['token_expiration'] = data.get('expires_at')
-    else:
-        session['token_expiration'] = int(time.time()) + (24 * 60 * 60)
-    
-    # Store user info in session
-    session['user'] = {
-        'sub': data.get('sub'),
-        'email': data.get('email'),
-        'name': data.get('name', data.get('email', 'User'))
-    }
-    
-    logger.info(f"Token processed and user added to session: {session.get('user', {}).get('email')}")
-    logger.info(f"Session expiration: {session.get('token_expiration')}")
+
+    try:
+        claims = verify_id_token(data['id_token'])
+    except TokenVerificationError as e:
+        logger.warning(f"Rejected an ID token posted to process-token: {e}")
+        return jsonify({'error': 'Invalid token'}), 401
+
+    establish_session(claims)
+    logger.info(f"User signed in: sub={claims['sub']}")
     
     return jsonify({'success': True, 'redirect': url_for('main.index')})
 
@@ -230,10 +191,7 @@ def process_token():
 def logout():
     """Logout endpoint"""
     # Clear the session
-    session.pop('user', None)
-    session.pop('id_token', None)
-    session.pop('access_token', None)
-    session.pop('token_expiration', None)
+    session.clear()
     
     # Check if authentication is disabled for local development
     if current_app.config.get('DISABLE_AUTH', False):

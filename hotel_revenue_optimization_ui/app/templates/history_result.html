@@ -168,16 +168,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="emailForm">
-                    <div class="mb-3">
-                        <label for="recipientEmail" class="form-label">Recipient Email</label>
-                        <input type="email" class="form-control" id="recipientEmail" required>
-                        <div class="invalid-feedback">
-                            Please enter a valid email address.
-                        </div>
-                        <div class="form-text">Report will be sent to this email with you CC'd</div>
-                    </div>
-                </form>
+                <p class="mb-0">The report will be sent to your verified email address:
+                    <strong>{{ session.get('user', {}).get('email', '') }}</strong></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -241,18 +233,7 @@
     }
 
     function sendEmailReport() {
-        const emailInput = document.getElementById('recipientEmail');
-        const email = emailInput.value.trim();
-        
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email || !emailRegex.test(email)) {
-            emailInput.classList.add('is-invalid');
-            alert('Please enter a valid email address');
-            return;
-        }
-        
-        emailInput.classList.remove('is-invalid');
+        // The server sends the report to the signed-in user's verified address only
         const timestamp = document.querySelector('[data-timestamp]').getAttribute('data-timestamp');
         
         // Get the send button
@@ -267,16 +248,12 @@
                 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({
-                email: email,
                 timestamp: timestamp
             })
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json().catch(() => {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }))
         .then(data => {
             if (data.success) {
                 alert('Report sent successfully!');
@@ -284,8 +261,6 @@
                 if (modalInstance) {
                     modalInstance.hide();
                 }
-                emailInput.value = '';
-                emailInput.classList.remove('is-invalid');
             } else {
                 alert('Failed to send report: ' + data.message);
             }

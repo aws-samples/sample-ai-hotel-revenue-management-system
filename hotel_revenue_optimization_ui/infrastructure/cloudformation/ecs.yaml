@@ -56,6 +56,14 @@ Parameters:
     Default: ""
     Description: Custom domain name for CloudFront (optional)
 
+  SenderEmail:
+    Type: String
+    Default: ""
+    Description: Optional sender address verified in Amazon SES for email reports. Leave empty to turn email reports off.
+
+Conditions:
+  HasSenderEmail: !Not [!Equals [!Ref SenderEmail, ""]]
+
 Resources:
   # VPC for the ECS cluster
   VPC:
@@ -145,6 +153,34 @@ Resources:
     Properties:
       ClusterName: !Sub ${AppName}-${Environment}-cluster
   
+  # Flask SECRET_KEY: random for each stack, kept in Secrets Manager and injected into the container at start
+  FlaskSecretKey:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "Flask SECRET_KEY for ${AppName}-${Environment}, signs the session cookies"
+      GenerateSecretString:
+        PasswordLength: 64
+        ExcludePunctuation: true
+      Tags:
+        - Key: AppName
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Value of the X-Origin-Verify header that CloudFront adds and the ALB requires, random for each stack
+  OriginVerifySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "X-Origin-Verify header value for ${AppName}-${Environment}, sent by CloudFront to the ALB"
+      GenerateSecretString:
+        PasswordLength: 48
+        ExcludePunctuation: true
+      Tags:
+        - Key: AppName
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+
   # ECS Task Execution Role
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
@@ -158,6 +194,21 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        # Lets ECS read the two secrets the container definition injects, and no other secret
+        - PolicyName: ReadContainerSecrets
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: ReadContainerSecrets
+                Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref FlaskSecretKey
+                  - Fn::ImportValue: !Sub ${AppName}-${Environment}-CognitoClientSecretArn
+                Condition:
+                  Bool:
+                    aws:SecureTransport: 'true'
   
   # ECS Task Role
   ECSTaskRole:
@@ -170,29 +221,38 @@ Resources:
             Principal:
               Service: ecs-tasks.amazonaws.com
             Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
+      # Only the calls the application makes; no managed policy
       Policies:
         - PolicyName: AgentCoreInvokePolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Effect: Allow
-                Action:
-                  - bedrock-agentcore:InvokeAgentRuntime
-                  - bedrock-agentcore:GetAgentRuntime
-                Resource: !Sub '${AgentCoreEndpoint}*'
-              - Effect: Allow
+              # app/api/agentcore.py: InvokeAgentRuntime is authorized on the runtime and on its endpoint
+              - Sid: InvokeAgentRuntime
+                Effect: Allow
+                Action: bedrock-agentcore:InvokeAgentRuntime
+                Resource:
+                  - !Ref AgentCoreEndpoint
+                  - !Sub '${AgentCoreEndpoint}/*'
+              # app/services/history.py: PutItem, GetItem and Query on the history table
+              - Sid: QueryHistoryTable
+                Effect: Allow
                 Action:
                   - dynamodb:PutItem
                   - dynamodb:GetItem
                   - dynamodb:Query
-                  - dynamodb:UpdateItem
                 Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${AppName}-${Environment}-query-history
-              - Effect: Allow
-                Action:
-                  - sns:Publish
-                Resource: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AppName}-${Environment}-email-reports
+              # app/services/email_report.py: SendEmail, only from the configured sender address
+              - !If
+                - HasSenderEmail
+                - Sid: SendReportEmail
+                  Effect: Allow
+                  Action: ses:SendEmail
+                  Resource: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+                  Condition:
+                    StringEquals:
+                      ses:FromAddress: !Ref SenderEmail
+                - !Ref AWS::NoValue
   
   # Security Group for ALB
   ALBSecurityGroup:
@@ -223,11 +283,6 @@ Resources:
     Properties:
       GroupDescription: Security group for ECS tasks
       VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: !Ref ContainerPort
-          ToPort: !Ref ContainerPort
-          SourceSecurityGroupId: !Ref ALBSecurityGroup
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 443
@@ -239,6 +294,18 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
           Description: Allow HTTP outbound
+
+  # Inbound from the ALB to the tasks, as a separate resource: inline rules in two security groups that
+  # reference each other form a circular dependency, which CloudFormation rejects
+  ECSIngressFromALB:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ECSSecurityGroup
+      IpProtocol: tcp
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      SourceSecurityGroupId: !Ref ALBSecurityGroup
+      Description: Allow inbound from the ALB
   
   # Application Load Balancer
   ALB:
@@ -295,7 +362,7 @@ Resources:
           HttpHeaderConfig:
             HttpHeaderName: X-Origin-Verify
             Values:
-              - !Sub "${AppName}-${Environment}-secret"
+              - !Sub '{{resolve:secretsmanager:${OriginVerifySecret}:SecretString}}'
       Actions:
         - Type: forward
           TargetGroupArn: !Ref ALBTargetGroup
@@ -331,8 +398,6 @@ Resources:
               Value: !Ref CognitoClientId
             - Name: COGNITO_CLIENT_ID
               Value: !Ref CognitoClientId
-            - Name: COGNITO_CLIENT_SECRET
-              Value: '{{resolve:secretsmanager:CognitoClientSecret:SecretString:clientSecret}}'
             - Name: COGNITO_DOMAIN
               Value: !Ref CognitoDomain
             - Name: AGENTCORE_RUNTIME_ARN
@@ -351,10 +416,21 @@ Resources:
               Value: !Sub "https://${CloudFrontDistribution.DomainName}/auth/callback"
             - Name: SESSION_COOKIE_SECURE
               Value: 'True'
+            - !If
+              - HasSenderEmail
+              - Name: SENDER_EMAIL
+                Value: !Ref SenderEmail
+              - !Ref AWS::NoValue
+          # Injected by ECS from Secrets Manager when the task starts. Unlike Environment values, they do
+          # not appear in the task definition.
+          Secrets:
             - Name: SECRET_KEY
-              Value: !Sub '${AppName}-${Environment}-production-key-2025'
-            - Name: AUTH_REDIRECT_URI
-              Value: !Sub 'https://${ALB.DNSName}/auth/callback'
+              ValueFrom: !Ref FlaskSecretKey
+            - Name: COGNITO_CLIENT_SECRET
+              ValueFrom: !Sub
+                - '${SecretArn}:clientSecret::'
+                - SecretArn:
+                    Fn::ImportValue: !Sub ${AppName}-${Environment}-CognitoClientSecretArn
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -365,7 +441,9 @@ Resources:
   # ECS Service
   ECSService:
     Type: AWS::ECS::Service
-    DependsOn: ALBListener
+    DependsOn:
+      - ALBListener
+      - ECSIngressFromALB
     Properties:
       ServiceName: !Sub ${AppName}-${Environment}-service
       Cluster: !Ref ECSCluster
@@ -411,7 +489,7 @@ Resources:
                 - TLSv1.2
             OriginCustomHeaders:
               - HeaderName: X-Origin-Verify
-                HeaderValue: !Sub "${AppName}-${Environment}-secret"
+                HeaderValue: !Sub '{{resolve:secretsmanager:${OriginVerifySecret}:SecretString}}'
         DefaultCacheBehavior:
           TargetOriginId: ALBOrigin
           ViewerProtocolPolicy: redirect-to-https

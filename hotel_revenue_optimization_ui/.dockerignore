@@ -1,0 +1,17 @@
+# Keep local secrets and development files out of the image
+.env
+.env.*
+.aws/
+*.pem
+.git/
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+instance/
+tests/
+*.log

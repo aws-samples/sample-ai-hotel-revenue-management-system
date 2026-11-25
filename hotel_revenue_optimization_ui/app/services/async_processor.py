@@ -67,8 +67,9 @@ class AsyncQueryProcessor:
                     
             except Exception as e:
                 logger.error(f"Error processing query {timestamp}: {e}")
-                # For certain errors, keep as processing and let it retry
-                if "Working outside of request context" in str(e) or "AGENTCORE_RUNTIME_ARN not configured" in str(e):
+                # For certain errors, keep as processing and let it retry. A missing AGENTCORE_RUNTIME_ARN
+                # is recorded as a failure, so the user sees the configuration error.
+                if "Working outside of request context" in str(e):
                     logger.info(f"Temporary error for query {timestamp}, keeping as processing")
                     return
                 

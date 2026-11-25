@@ -7,6 +7,7 @@ from app.services.history import QueryHistoryService
 from app.services.email_report import EmailReportService
 from app.services.async_processor import async_processor
 import markdown
+import nh3
 import json
 import logging
 import time
@@ -27,6 +28,25 @@ if not logger.handlers:
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
+
+# Tags kept in rendered reports: nh3's default allowlist without img, so a report cannot load
+# third-party images (tracking or data exfiltration through image URLs)
+REPORT_ALLOWED_TAGS = nh3.ALLOWED_TAGS - {'img'}
+
+def render_markdown(text):
+    """Convert markdown from the agent or the user into HTML that is safe to output with |safe.
+
+    Python-Markdown passes raw HTML through unchanged, so its output is cleaned with nh3, an allowlist
+    sanitizer: script and style elements, event handler attributes such as onerror, javascript: URLs
+    and inline styles are removed.
+    """
+    html = markdown.markdown(
+        text or '',
+        extensions=['tables', 'fenced_code'],
+        # Column alignment as an align attribute, which the sanitizer keeps, instead of a style attribute
+        extension_configs={'tables': {'use_align_attribute': True}}
+    )
+    return nh3.clean(html, tags=REPORT_ALLOWED_TAGS, url_schemes={'http', 'https', 'mailto'})
 
 @bp.route('/')
 def index():
@@ -137,10 +157,7 @@ Please try again in a few minutes. If the issue persists, contact your system ad
                 "completed_tasks": [],
                 "failed_tasks": ["response_processing"]
             }
-            markdown_content = markdown.markdown(
-                result['markdown_content'],
-                extensions=['tables', 'fenced_code']
-            )
+            markdown_content = render_markdown(result['markdown_content'])
     
     return render_template(
         'natural_language.html',
@@ -206,68 +223,6 @@ def structured_form():
             })
         
         except Exception as e:
-            response_content = response.get('markdown_content') or response.get('report', '')
-            if response_content and response_content.strip().startswith('{'):
-                try:
-                    # Try to parse the content as JSON (it might be an error response)
-                    import json
-                    logger.info(f"Structured Form - Attempting to parse response content as JSON: {response_content[:200]}...")
-                    error_data = json.loads(response_content)
-                    if error_data.get('status') == 'error':
-                        logger.info("Structured Form - Detected JSON error response")
-                        logger.info(f"Structured Form - Error data: {error_data}")
-                        # Update the result with parsed error data
-                        result.update(error_data)
-                        # Clear the content fields since they're now parsed
-                        result['markdown_content'] = None
-                        result['report'] = None
-                        logger.info(f"Structured Form - Updated result: {result}")
-                except (json.JSONDecodeError, ValueError) as e:
-                    # If it's not valid JSON, treat it as regular content
-                    logger.info(f"Structured Form - Failed to parse as JSON: {e}")
-                    pass
-            
-            # Check if there was an error
-            if "error" in response or result.get('status') == 'error':
-                error_msg = response.get('error') or result.get('message', 'Unknown error occurred')
-                logger.error(f"Error in AgentCore response: {error_msg}")
-                flash(f"Error: {error_msg}", 'danger')
-            else:
-                # Handle the new response schema with 'report' field
-                if 'report' in response and response['report'] and not result.get('status') == 'error':
-                    logger.info("Converting report content to HTML")
-                    markdown_content = markdown.markdown(
-                        response['report'],
-                        extensions=['tables', 'fenced_code']
-                    )
-                elif 'markdown_content' in response and response['markdown_content'] and not result.get('status') == 'error':
-                    logger.info("Converting markdown_content to HTML")
-                    markdown_content = markdown.markdown(
-                        response['markdown_content'],
-                        extensions=['tables', 'fenced_code']
-                    )
-                    logger.info("Converting markdown content to HTML")
-                    markdown_content = markdown.markdown(
-                        response['markdown_content'],
-                        extensions=['tables', 'fenced_code']
-                    )
-                
-                # Save to session for history
-                if 'query_history' not in session:
-                    session['query_history'] = []
-                
-                logger.info("Adding query to history")
-                session['query_history'].append({
-                    'query': f"Hotel: {payload['hotel_name']}, Type: {payload['hotel_type']}, Location: {payload['location']}, Season: {payload['season']}",
-                    'timestamp': datetime.now().isoformat(),
-                    'result_summary': response.get('summary', 'No summary available'),
-                    'status': response.get('status', 'unknown')
-                })
-                session.modified = True
-                
-                flash('Form processed successfully', 'success')
-        
-        except Exception as e:
             logger.error(f"Error processing form: {str(e)}", exc_info=True)
             flash(f'Error processing form: {str(e)}', 'danger')
             result = {
@@ -293,10 +248,7 @@ Please try again in a few minutes. If the issue persists, contact your system ad
                 "completed_tasks": [],
                 "failed_tasks": ["response_processing"]
             }
-            markdown_content = markdown.markdown(
-                result['markdown_content'],
-                extensions=['tables', 'fenced_code']
-            )
+            markdown_content = render_markdown(result['markdown_content'])
     
     return render_template(
         'structured_form.html',
@@ -341,10 +293,7 @@ def view_history_result(timestamp):
     error_details = None
     
     if result_data.get('markdown_content'):
-        markdown_content = markdown.markdown(
-            result_data['markdown_content'],
-            extensions=['tables', 'fenced_code']
-        )
+        markdown_content = render_markdown(result_data['markdown_content'])
     
     # Parse JSON error messages for better display
     if query_result.get('result_status') in ['failed', 'error'] and query_result.get('result_summary'):
@@ -365,25 +314,28 @@ def view_history_result(timestamp):
 @bp.route('/send-email-report', methods=['POST'])
 @token_required
 def send_email_report():
-    """Send email report for a query result"""
+    """Email a report from the signed-in user's history to that user's own verified address"""
     logger.info("Email report endpoint called")
     try:
-        data = request.get_json()
-        logger.info(f"Request data: {data}")
+        data = request.get_json(silent=True)
+        timestamp = data.get('timestamp') if isinstance(data, dict) else None
         
-        recipient_email = data.get('email') if data else None
-        timestamp = data.get('timestamp') if data else None
+        if not timestamp:
+            logger.warning("Missing timestamp")
+            return jsonify({'success': False, 'message': 'Timestamp required'}), 400
         
-        logger.info(f"Email: {recipient_email}, Timestamp: {timestamp}")
-        
-        if not recipient_email or not timestamp:
-            logger.warning("Missing email or timestamp")
-            return jsonify({'success': False, 'message': 'Email and timestamp required'}), 400
-        
-        user_id = session.get('user', {}).get('sub')
-        user_email = session.get('user', {}).get('email', 'unknown@example.com')
-        
-        logger.info(f"User ID: {user_id}, User Email: {user_email}")
+        # The only recipient is the signed-in user, at the address Cognito verified. The request
+        # cannot name a recipient or a copy address (any 'email' field in the body is ignored).
+        user = session.get('user', {})
+        user_id = user.get('sub')
+        recipient_email = user.get('email')
+        if not recipient_email or not user.get('email_verified'):
+            logger.warning(f"No verified email address for user {user_id}")
+            return jsonify({'success': False, 'message': 'Your account has no verified email address'}), 403
+
+        if not email_service.is_configured():
+            logger.warning("Email reports are not configured (SENDER_EMAIL is not set)")
+            return jsonify({'success': False, 'message': 'Email reports are not configured'}), 503
         
         # Get query result
         query_result = history_service.get_query_result(user_id, timestamp)
@@ -394,7 +346,6 @@ def send_email_report():
         # Send email
         success = email_service.send_report_email(
             recipient_email=recipient_email,
-            cc_email=user_email,
             report_data=query_result.get('result_data', {}),
             query_summary=query_result.get('query_summary', 'Hotel Revenue Analysis')
         )

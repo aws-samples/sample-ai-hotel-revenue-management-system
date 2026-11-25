@@ -111,9 +111,14 @@ Required environment variables:
 
 5. Open your browser and navigate to http://localhost:5000
 
+The development server listens on 127.0.0.1 only. Do not expose it on other interfaces: the development
+configuration turns on the Werkzeug debugger, which runs code for anyone who can reach it (`python app.py`
+switches the debugger off if you set `FLASK_RUN_HOST` to another address).
+
 ### Testing Without Amazon Bedrock AgentCore
 
-For local testing without connecting to Amazon Bedrock AgentCore, leave the `AGENTCORE_RUNTIME_ARN` empty in the `.env` file. The application will use mock responses for testing.
+`AGENTCORE_RUNTIME_ARN` has no default. If it is empty, the pages still load locally, but each query fails with
+a message asking you to set it; with `FLASK_ENV=production` the application refuses to start.
 
 ## Deployment Options
 
@@ -136,6 +141,7 @@ The `./scripts/deploy.sh` script handles the complete deployment process:
 - `--env ENV`: Environment (dev, test, prod). Default: dev
 - `--region REGION`: AWS region. Default: from AWS CLI config or us-west-2
 - `--agentcore-arn ARN`: AgentCore runtime ARN. If not provided, reads from .env
+- `--sender-email ADDRESS`: Sender address verified in Amazon SES; turns on email reports (optional)
 - `--skip-build`: Skip Docker image build and push
 - `--force`: Skip confirmation prompts
 - `--help`: Show help message
@@ -179,6 +185,16 @@ The test script validates:
 - ECS service health (running tasks match desired count)
 - AgentCore connectivity (if health endpoint available)
 
+### Security Tests
+
+The tests in `tests/` check token verification, sign-in (state and PKCE), redirects, HTML sanitizing, email
+reports and the production configuration. They need no network and no AWS account:
+
+```bash
+pip install -r requirements-dev.txt
+PYTHONPATH=. python -m pytest tests
+```
+
 ### Manual Testing
 
 1. **Access the Application**: Navigate to the provided URL after deployment
@@ -197,6 +213,10 @@ The test script validates:
 - `DISABLE_AUTH=False`
 - `AGENTCORE_RUNTIME_ARN=<your-runtime-arn>`
 - `AWS_REGION=<your-region>`
+- `SECRET_KEY`: a random value of at least 32 characters. The ECS template generates one in AWS Secrets Manager
+  and injects it; the application refuses to start in production without a strong key.
+- `SENDER_EMAIL` (optional): sender address verified in Amazon SES. Email reports go only to the signed-in
+  user's verified address, and are off when this is empty.
 
 **Development Environment:**
 - `FLASK_ENV=development`
@@ -218,7 +238,10 @@ The deployment automatically configures:
 - **Authentication**: AWS Cognito with secure token handling
 - **IAM Permissions**: Least-privilege access to AWS services
 - **Container Security**: Non-root user, minimal base image
-- **Secrets Management**: AWS Secrets Manager for sensitive data
+- **Secrets Management**: AWS Secrets Manager for sensitive data; the session signing key and the Cognito client
+  secret reach the container through the task definition `secrets` field, not plain environment variables
+- **Token Verification**: Cognito ID tokens are accepted only after their signature, issuer, audience and expiry
+  are verified against the user pool's JSON Web Key Set
 
 ### Amazon Bedrock AgentCore Permissions
 
@@ -226,12 +249,12 @@ The application requires specific permissions to access Amazon Bedrock AgentCore
 
 **Required IAM Permissions:**
 - `bedrock-agentcore:InvokeAgentRuntime` - To invoke the AgentCore runtime
-- `bedrock-agentcore:GetAgentRuntime` - To retrieve runtime information
 
 **Important Notes:**
-- The CloudFormation template automatically creates the correct IAM role with these permissions
-- The permissions include a wildcard (`*`) suffix to cover sub-resources like `/runtime-endpoint/DEFAULT`
-- Without these permissions, the application will fall back to mock responses
+- The CloudFormation template automatically creates the correct IAM role with this permission, and no managed policy
+- The permission is granted on the runtime ARN and on `<runtime ARN>/*`, which covers its endpoints such as
+  `/runtime-endpoint/DEFAULT` (AgentCore authorizes the invocation on both)
+- Without this permission, queries fail with an AccessDeniedException
 
 **Validation:**
 Use the validation script to ensure AgentCore permissions are working:
@@ -250,7 +273,7 @@ Use the validation script to ensure AgentCore permissions are working:
    - Run the validation script: `./scripts/validate-agentcore.sh`
    - Ensure the ECS task role has `bedrock-agentcore:InvokeAgentRuntime` permission
    - Verify the AgentCore ARN is correctly configured in the task definition
-   - Check that the IAM policy resource includes the wildcard suffix (`*`)
+   - Check that the IAM policy allows both the runtime ARN and `<runtime ARN>/*` (its endpoints)
 
 2. **AgentCore Agent Not Found**
    ```
